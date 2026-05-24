@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIStack · готовые AI-сборки для услугового бизнеса и экспертов</title>
+<meta name="description" content="Купи → установи за вечер → каждый день работает. AI-админы салонов, кураторы курсов, секретари экспертов, аудиторы рекламы. От 4 900 ₽.">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg-2: #11111a;
+    --bg-3: #1a1a26;
+    --border: #2a2a3a;
+    --border-2: #3a3a4a;
+    --text: #e8e8ef;
+    --text-2: #9090a8;
+    --text-3: #5a5a72;
+    --accent: #7c5cff;
+    --accent-2: #5b3df0;
+    --accent-light: #c97aff;
+    --green: #3ddc97;
+    --yellow: #ffb84d;
+    --red: #ff5577;
+    --radius: 14px;
+    --mono: 'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent-light); text-decoration: none; }
+  a:hover { color: var(--text); }
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+  /* ========================================================================
+     HEADER
+  ======================================================================== */
+  header {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(10,10,15,0.88);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 24px; max-width: 1200px; margin: 0 auto;
+  }
+  .logo { font-weight: 700; font-size: 18px; letter-spacing: -0.02em; display: flex; align-items: center; gap: 8px; }
+  .logo span { color: var(--accent); }
+  .logo-icon {
+    width: 28px; height: 28px; border-radius: 7px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-light));
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 14px;
+  }
+  .nav-links { display: flex; gap: 28px; }
+  .nav-links a { color: var(--text-2); font-size: 14px; }
+  .nav-links a:hover { color: var(--text); }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 11px 20px; border-radius: 10px;
+    font-family: inherit; font-size: 14px; font-weight: 600;
+    background: var(--accent); color: white;
+    border: none; cursor: pointer;
+    transition: all 0.15s ease;
+    text-decoration: none;
+  }
+  .btn:hover { background: var(--accent-2); color: white; }
+  .btn:active { transform: scale(0.98); }
+  .btn-outline { background: transparent; border: 1px solid var(--border-2); color: var(--text); }
+  .btn-outline:hover { background: var(--bg-3); border-color: var(--accent); }
+  .btn-sm { padding: 8px 14px; font-size: 13px; }
+  .btn-lg { padding: 14px 26px; font-size: 15px; }
+
+  /* ========================================================================
+     HERO
+  ======================================================================== */
+  .hero { padding: 90px 0 60px; position: relative; overflow: hidden; }
+  .hero::before {
+    content: ""; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 800px; height: 800px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(124,92,255,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-inner { text-align: center; position: relative; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 14px; border-radius: 999px;
+    background: rgba(124,92,255,0.12); color: var(--accent-light);
+    font-size: 13px; font-weight: 500; margin-bottom: 26px;
+    border: 1px solid rgba(124,92,255,0.25);
+  }
+  .badge .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+  h1 {
+    font-size: 60px; line-height: 1.05; letter-spacing: -0.03em;
+    font-weight: 800; max-width: 920px; margin: 0 auto 22px;
+  }
+  h1 .gradient {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero p.subtitle {
+    font-size: 19px; color: var(--text-2); max-width: 680px;
+    margin: 0 auto 36px;
+  }
+  .hero-ctas { display: flex; gap: 12px; justify-content: center; margin-bottom: 50px; }
+  .hero-meta {
+    display: flex; gap: 32px; justify-content: center; flex-wrap: wrap;
+    color: var(--text-2); font-size: 14px;
+  }
+  .hero-meta div { display: flex; align-items: center; gap: 6px; }
+  .hero-meta strong { color: var(--text); }
+
+  /* ========================================================================
+     SECTIONS
+  ======================================================================== */
+  section { padding: 70px 0; }
+  .section-head { text-align: center; margin-bottom: 50px; }
+  .section-head .eyebrow {
+    display: inline-block; font-size: 12px; color: var(--accent);
+    text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .section-head h2 {
+    font-size: 40px; letter-spacing: -0.02em; font-weight: 700;
+    margin-bottom: 12px; line-height: 1.15;
+  }
+  .section-head p { color: var(--text-2); font-size: 17px; max-width: 600px; margin: 0 auto; }
+
+  /* ========================================================================
+     AUDIENCE BLOCK
+  ======================================================================== */
+  .vs-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+    margin-bottom: 20px;
+  }
+  .vs-card {
+    background: var(--bg-2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px;
+  }
+  .vs-card.us { border-color: var(--accent); background: linear-gradient(180deg, rgba(124,92,255,0.06), transparent); }
+  .vs-title {
+    font-size: 13px; color: var(--text-2); margin-bottom: 6px;
+    text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600;
+  }
+  .vs-card.us .vs-title { color: var(--accent); }
+  .vs-name { font-size: 19px; font-weight: 700; margin-bottom: 12px; }
+  .vs-list { list-style: none; padding: 0; font-size: 14px; }
+  .vs-list li { padding: 6px 0; color: var(--text-2); display: flex; gap: 8px; align-items: flex-start; }
+  .vs-list li::before { content: "—"; color: var(--text-3); flex-shrink: 0; }
+  .vs-card.us .vs-list li::before { content: "✓"; color: var(--green); }
+
+  /* ========================================================================
+     PRODUCTS GRID
+  ======================================================================== */
+  .grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+  }
+  .card {
+    background: var(--bg-2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 26px;
+    transition: all 0.2s ease;
+    display: flex; flex-direction: column;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-light));
+    opacity: 0; transition: opacity 0.2s ease;
+  }
+  .card:hover { border-color: var(--accent); transform: translateY(-3px); }
+  .card:hover::before { opacity: 1; }
+  .card-tag-row { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+  .card-tag {
+    display: inline-block; font-size: 11px; padding: 3px 9px;
+    border-radius: 6px; background: var(--bg-3); color: var(--text-2);
+    font-family: var(--mono); font-weight: 500;
+  }
+  .card-tag.unique { color: var(--accent-light); background: rgba(201,122,255,0.12); }
+  .card-tag.hot { color: var(--red); background: rgba(255,85,119,0.12); }
+  .card-tag.big { color: var(--green); background: rgba(61,220,151,0.12); }
+  .card-icon-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px; }
+  .card-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-light));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+  }
+  .card-price {
+    font-family: var(--mono); font-size: 22px; font-weight: 700;
+    color: var(--text);
+  }
+  .card-price-old {
+    font-family: var(--mono); font-size: 13px; color: var(--text-3);
+    text-decoration: line-through; display: block;
+  }
+  .card h3 { font-size: 21px; line-height: 1.2; margin-bottom: 8px; letter-spacing: -0.01em; }
+  .card-desc { font-size: 14px; color: var(--text-2); margin-bottom: 18px; flex: 1; }
+  .card-bullets { list-style: none; padding: 0; font-size: 13px; margin-bottom: 20px; }
+  .card-bullets li { padding: 4px 0; color: var(--text-2); display: flex; gap: 8px; }
+  .card-bullets li::before { content: "✓"; color: var(--green); flex-shrink: 0; }
+  .card-bottom {
+    padding-top: 18px; border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .card-target { font-size: 12px; color: var(--text-3); }
+  .card-cta {
+    color: var(--accent-light); font-size: 13px; font-weight: 600;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .card:hover .card-cta { color: var(--text); }
+
+  /* ========================================================================
+     HOW IT WORKS
+  ======================================================================== */
+  .steps {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
+  }
+  .step {
+    background: var(--bg-2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 26px; position: relative;
+  }
+  .step-num {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: rgba(124,92,255,0.15); color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; margin-bottom: 16px; font-family: var(--mono);
+  }
+  .step h4 { font-size: 17px; margin-bottom: 8px; }
+  .step p { font-size: 13.5px; color: var(--text-2); }
+  .step-time { font-size: 11px; color: var(--text-3); margin-top: 10px; font-family: var(--mono); }
+
+  /* ========================================================================
+     STACK COMPATIBILITY
+  ======================================================================== */
+  .stack-bar {
+    background: var(--bg-2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 32px 36px;
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 24px; flex-wrap: wrap;
+  }
+  .stack-bar h3 { font-size: 18px; margin: 0; }
+  .stack-bar p { font-size: 13px; color: var(--text-2); margin-top: 4px; }
+  .stack-logos { display: flex; gap: 18px; flex-wrap: wrap; align-items: center; }
+  .stack-logo {
+    padding: 8px 14px; border: 1px solid var(--border);
+    border-radius: 8px; font-size: 13px; color: var(--text-2);
+    font-family: var(--mono);
+  }
+
+  /* ========================================================================
+     PROOF
+  ======================================================================== */
+  .proof-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+  }
+  .proof-card {
+    background: var(--bg-2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 26px;
+  }
+  .proof-stat {
+    font-size: 40px; font-weight: 800; line-height: 1;
+    background: linear-gradient(135deg, var(--accent), var(--accent-light));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+  .proof-label { font-size: 14px; color: var(--text); margin-bottom: 8px; font-weight: 600; }
+  .proof-source { font-size: 12px; color: var(--text-3); }
+
+  /* ========================================================================
+     SERVICES
+  ======================================================================== */
+  .service-block {
+    background: linear-gradient(135deg, rgba(124,92,255,0.10), rgba(201,122,255,0.04));
+    border: 1px solid rgba(124,92,255,0.3);
+    border-radius: 20px; padding: 56px 48px; text-align: center;
+  }
+  .service-block h2 { margin-bottom: 14px; }
+  .service-block p {
+    color: var(--text-2); margin-bottom: 32px; max-width: 540px;
+    margin-left: auto; margin-right: auto; font-size: 16px;
+  }
+  .service-tiers {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+    text-align: left; margin-bottom: 28px;
+  }
+  .tier {
+    background: rgba(10,10,15,0.5); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px;
+  }
+  .tier-name { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+  .tier-price { font-family: var(--mono); font-size: 13px; color: var(--accent-light); margin-bottom: 10px; }
+  .tier-desc { font-size: 13px; color: var(--text-2); }
+
+  /* ========================================================================
+     FAQ
+  ======================================================================== */
+  .faq-list { max-width: 760px; margin: 0 auto; }
+  .faq-item {
+    background: var(--bg-2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px 24px; margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .faq-question {
+    display: flex; justify-content: space-between; align-items: center;
+    font-weight: 600; font-size: 15px;
+  }
+  .faq-question::after {
+    content: "+"; color: var(--accent); font-size: 22px;
+    transition: transform 0.2s ease;
+  }
+  .faq-item.open .faq-question::after { content: "−"; }
+  .faq-answer {
+    font-size: 14px; color: var(--text-2); margin-top: 12px;
+    display: none;
+  }
+  .faq-item.open .faq-answer { display: block; }
+
+  /* ========================================================================
+     CTA
+  ======================================================================== */
+  .cta-block {
+    text-align: center; padding: 90px 0;
+    background: linear-gradient(180deg, transparent, rgba(124,92,255,0.06));
+    border-top: 1px solid var(--border);
+  }
+  .cta-block h2 { font-size: 38px; max-width: 720px; margin: 0 auto 16px; }
+  .cta-block p { color: var(--text-2); margin-bottom: 32px; }
+
+  /* ========================================================================
+     FOOTER
+  ======================================================================== */
+  footer { padding: 50px 0 30px; border-top: 1px solid var(--border); }
+  .footer-grid {
+    display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 32px;
+    margin-bottom: 32px;
+  }
+  .footer-col h5 { font-size: 13px; margin-bottom: 14px; color: var(--text); }
+  .footer-col a { display: block; color: var(--text-2); font-size: 13px; margin-bottom: 8px; }
+  .footer-col p { font-size: 13px; color: var(--text-2); max-width: 280px; }
+  .footer-bottom {
+    padding-top: 24px; border-top: 1px solid var(--border);
+    color: var(--text-3); font-size: 12px;
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  }
+
+  /* ========================================================================
+     RESPONSIVE
+  ======================================================================== */
+  @media (max-width: 1000px) {
+    h1 { font-size: 44px; }
+    .grid, .vs-grid, .proof-grid, .service-tiers { grid-template-columns: 1fr 1fr; }
+    .steps { grid-template-columns: 1fr 1fr; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 640px) {
+    h1 { font-size: 34px; }
+    .nav-links { display: none; }
+    .grid, .vs-grid, .proof-grid, .service-tiers, .steps { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr; }
+    .hero-ctas { flex-direction: column; }
+    .hero-ctas .btn { width: 100%; justify-content: center; }
+    .section-head h2 { font-size: 28px; }
+    .service-block { padding: 36px 22px; }
+    .stack-bar { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="nav">
+    <div class="logo"><div class="logo-icon">A</div>AI<span>Stack</span></div>
+    <nav class="nav-links">
+      <a href="#products">Команды</a>
+      <a href="#addons">Доп.скиллы</a>
+      <a href="#how">Как работает</a>
+      <a href="#service">Под ключ</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <a class="btn btn-sm" href="#products">Открыть каталог →</a>
+  </div>
+</header>
+
+<main>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container hero-inner">
+    <div class="badge"><span class="dot"></span> 8 агентов одной командой · одним установщиком · за вечер</div>
+    <h1>AI-команда <span class="gradient">за вечер</span>.<br>Один установщик. 8 агентов.</h1>
+    <p class="subtitle">AIStack собирает персональную AI-команду под вашу задачу — Агент.exe, маркетолог, копирайтер, переговорщик и ещё четыре роли. Купил → ввёл пароль → собрал → работает. Не курс. Не подписка.</p>
+    <div class="hero-ctas">
+      <a class="btn btn-lg" href="#products">Каталог сборок →</a>
+      <a class="btn btn-lg btn-outline" href="#how">Как это работает</a>
+    </div>
+    <div class="hero-meta">
+      <div><strong>8</strong> ролей в команде</div>
+      <div><strong>33</strong> готовых скилла</div>
+      <div><strong>~ 1 час</strong> от оплаты до работающего AI</div>
+      <div><strong>0 ₽</strong> подписок · разовая покупка</div>
+    </div>
+  </div>
+</section>
+
+<!-- AUDIENCE -->
+<section>
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Для кого подходит</span>
+      <h2>Бизнес и эксперты,<br>у которых рутина съедает время</h2>
+      <p>Каждая сборка решает один конкретный процесс. Не «помощник на всё» — а инструмент под задачу.</p>
+    </div>
+    <div class="vs-grid">
+
+      <div class="vs-card us">
+        <div class="vs-title">Услуговый бизнес</div>
+        <div class="vs-name">Салоны, клиники, студии</div>
+        <ul class="vs-list">
+          <li>Теряете клиентов из-за медленных ответов</li>
+          <li>Администратор не успевает по ночам и выходным</li>
+          <li>Много типовых вопросов про цены и услуги</li>
+          <li>Нужен онлайн-прайс и запись 24/7</li>
+        </ul>
+      </div>
+
+      <div class="vs-card us">
+        <div class="vs-title">Эксперты</div>
+        <div class="vs-name">Психологи, коучи, репетиторы</div>
+        <ul class="vs-list">
+          <li>Часы уходят на конспекты сессий</li>
+          <li>Между встречами заваливают вопросами</li>
+          <li>Контент для соцсетей делать некогда</li>
+          <li>Один в поле — нет команды поддержки</li>
+        </ul>
+      </div>
+
+      <div class="vs-card us">
+        <div class="vs-title">Онлайн-школы и B2B</div>
+        <div class="vs-name">Курсы, продюсеры, B2B-сервисы</div>
+        <ul class="vs-list">
+          <li>Куратор тонет в проверке ДЗ</li>
+          <li>Менеджер 3 часа в день на CRM и КП</li>
+          <li>Студенты уходят без догрева</li>
+          <li>Холодная база не прозванивается</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<section id="products">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Каталог команд</span>
+      <h2>6 базовых команд под задачи<br>+ полная команда из 8 агентов</h2>
+      <p>Все базовые команды — одна цена 4 990 ₽. Полная команда — флагман. Доп.скиллы докупаются отдельно. Только разовая покупка, без подписок.</p>
+    </div>
+
+    <div class="grid">
+
+      <div class="card" onclick="alert('Здесь будет страница /p/team-content')">
+        <div class="card-tag-row">
+          <span class="card-tag">3 агента</span>
+          <span class="card-tag">Контент</span>
+        </div>
+        <div class="card-icon-row">
+          <div class="card-icon">✍</div>
+          <div><div class="card-price">4 990 ₽</div></div>
+        </div>
+        <h3>Контент-команда</h3>
+        <p class="card-desc">Копирайтер + контент-агент + дизайнер. Посты, сценарии Reels, обложки, нарезка эфиров — всё в одной команде.</p>
+        <ul class="card-bullets">
+          <li>Копирайтер · тексты под ваш стиль</li>
+          <li>Контент-агент · Reels, YouTube, нарезка</li>
+          <li>Дизайнер · обложки, промпты MJ</li>
+        </ul>
+        <div class="card-bottom">
+          <div class="card-target">блогеры, эксперты, SMM-щики</div>
+          <div class="card-cta">Подробнее →</div>
+        </div>
+      </div>
+
+      <div class="card" onclick="alert('Здесь будет страница /p/team-sales')">
+        <div class="card-tag-row">
+          <span class="card-tag">3 агента</span>
+          <span class="card-tag">Продажи</span>
+        </div>
+        <div class="card-icon-row">
+          <div class="card-icon">🎯</div>
+          <div><div class="card-price">4 990 ₽</div></div>
+        </div>
+        <h3>Продажная команда</h3>
+        <p class="card-desc">Агент.exe + переговорщик + маркетолог. Квалифицирует заявки, дожимает тёплых, работает с возражениями, собирает офферы.</p>
+        <ul class="card-bullets">
+          <li>Агент.exe · распределяет работу</li>
+          <li>Переговорщик · переписка с клиентами</li>
+          <li>Маркетолог · офферы и сегментация</li>
+        </ul>
+        <div class="card-bottom">
+          <div class="card-target">услуговый бизнес, B2B-сервисы</div>
+          <div class="card-cta">Подробнее →</div>
+        </div>
+      </div>
+
+      <div class="card" onclick="alert('Здесь будет страница /p/team-expert')">
+        <div class="card-tag-row">
+          <span class="card-tag">3 агента</span>
+          <span class="card-tag">Эксперты</span>
+        </div>
+        <div class="card-icon-row">
+          <div class="card-icon">🧠</div>
+          <div><div class="card-price">4 990 ₽</div></div>
+        </div>
+        <h3>Команда эксперта</h3>
+        <p class="card-desc">Агент.exe + копирайтер + переговорщик. Закрывает рутину одного эксперта: записи, ответы клиентам, контент, материалы.</p>
+        <ul class="card-bullets">
+          <li>Агент.exe · ведёт расписание и память</li>
+          <li>Копирайтер · посты под ваш стиль</li>
+          <li>Переговорщик · ответы новым клиентам</li>
+        </ul>
+        <div class="card-bottom">
+          <div class="card-target">психологи, коучи, репетиторы</div>
+          <div class="card-cta">Подробнее →</div>
+        </div>
+      </div>
+
+      <div class="card" onclick="alert('Здесь будет страница /p/team-business')">
+        <div class="card-tag-row">
+          <span class="card-tag">3 агента</span>
+          <span class="card-tag">Бизнес</span>
+        </div>
+        <div class="card-icon-row">
+          <div class="card-icon">📊</div>
+          <div><div class="card-price">4 990 ₽</div></div>
+        </div>
+        <h3>Бизнес-команда</h3>
+        <p class="card-desc">Продюсер + маркетолог + переговорщик. Стратегия, аналитика воронок, расчёт ROI, закрытие сделок.</p>
+        <ul class="card-bullets">
+          <li>Продюсер · стратегия и unit-экономика</li>
+          <li>Маркетолог · воронки и конкуренты</li>
+          <li>Переговорщик · продажи</li>
+        </ul>
+        <div class="card-bottom">
+          <div class="card-target">малый бизнес, продюсеры</div>
+          <div class="card-cta">Подробнее →</div>
+        </div>
+      </div>
+
+      <div class="card" onclick="alert('Здесь будет страница /p/team-school')">
+        <div class="card-tag-row">
+          <span class="card-tag">3 агента</span>
+          <span class="card-tag">Онлайн-школы</span>
+        </div>
+        <div class="card-icon-row">
+          <div class="card-icon">🎓</div>
+          <div><div class="card-price">4 990 ₽</div></div>
+        </div>
+        <h3>Школьная команда</h3>
+        <p class="card-desc">Агент.exe + продюсер + копирайтер. Учебный контент, расписание спринта, ответы студентам. Под доп.скилл «AI-куратор» — тянет проверку ДЗ.</p>
+        <ul class="card-bullets">
+          <li>Агент.exe · координирует поток</li>
+          <li>Продюсер · программа и дорожная карта</li>
+          <li>Копирайтер · уроки, материалы, рассылки</li>
+        </ul>
+        <div class="card-bottom">
+          <div class="card-target">школы, продюсеры, авторы курсов</div>
+          <div class="card-cta">Подробнее →</div>
+        </div>
+      </div>
+
+      <div class="card" onclick="alert('Здесь будет страница /p/team-tech')">
+        <div class="card-tag-row">
+          <span class="card-tag">2 агента</span>
+          <span class="card-tag">Автоматизация</span>
+        </div>
+        <div class="card-icon-row">
+          <div class="card-icon">⚙</div>
+          <div><div class="card-price">4 990 ₽</div></div>
+        </div>
+        <h3>Тех-команда</h3>
+        <p class="card-desc">Агент.exe + технарь. Подключение MCP, интеграции API, отладка ошибок, мелкие скрипты-автоматизации.</p>
+        <ul class="card-bullets">
+          <li>Агент.exe · ставит задачи</li>
+          <li>Технарь · код, MCP, API, отладка</li>
+          <li>Готовые рецепты автоматизаций</li>
+        </ul>
+        <div class="card-bottom">
+          <div class="card-target">для тех, кто сам автоматизирует</div>
+          <div class="card-cta">Подробнее →</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ФЛАГМАН большой карточкой -->
+    <div style="margin-top: 32px;">
+      <div class="card" style="grid-column: 1 / -1; border-color: var(--accent); background: linear-gradient(135deg, rgba(124,92,255,0.10), rgba(201,122,255,0.04)); padding: 36px; cursor: pointer;" onclick="alert('Здесь будет страница /p/full-team')">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: center;" class="flagship-row">
+          <div>
+            <div class="card-tag-row">
+              <span class="card-tag" style="background: var(--accent); color: white;">⭐ ФЛАГМАН</span>
+              <span class="card-tag">Полная команда</span>
+              <span class="card-tag" style="background: rgba(61,220,151,0.12); color: var(--green);">−25%</span>
+            </div>
+            <h3 style="font-size: 28px; margin-bottom: 12px;">AIStack · полная AI-команда</h3>
+            <p style="color: var(--text-2); font-size: 15px; margin-bottom: 16px;">Все 8 ролей + Hermes как память + Dashboard команды. Установщик соберёт под любую задачу — за вечер. Включает все 7 AIStack Originals.</p>
+            <ul class="card-bullets" style="grid-template-columns: 1fr 1fr; display: grid; gap: 4px 18px;">
+              <li>8 агентов одной командой</li>
+              <li>33 готовых скилла</li>
+              <li>Hermes — долговременная память</li>
+              <li>Dashboard загруженности</li>
+              <li>Все 7 AIStack Originals внутри</li>
+              <li>Свои скиллы в редакторе</li>
+            </ul>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-family: var(--mono); color: var(--text-3); font-size: 14px; text-decoration: line-through; margin-bottom: 4px;">39 990 ₽</div>
+            <div style="font-family: var(--mono); font-size: 42px; font-weight: 800; color: var(--text); margin-bottom: 16px;">29 990 ₽</div>
+            <div style="color: var(--text-2); font-size: 13px; margin-bottom: 20px;">разово · доступ навсегда · обновления первый год</div>
+            <a class="btn btn-lg" href="#" onclick="event.stopPropagation(); alert('Здесь будет переход на оплату ЮKassa');">Купить полную команду →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- NICHE BUNDLES · готовые сборки под конкретную бизнес-задачу -->
+<section id="bundles">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Нишевые сборки</span>
+      <h2>Готовые сборки под конкретную задачу</h2>
+      <p>Не «команда из ролей», а узкоспециализированный продукт под бизнес-процесс. С описанием для чего и как применять.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+
+      <!-- AI-куратор курса -->
+      <div class="card" onclick="alert('Здесь будет страница /p/ai-course-curator')" style="cursor: pointer;">
+        <div class="card-tag-row">
+          <span class="card-tag big">BIG ROI</span>
+          <span class="card-tag">Онлайн-школы</span>
+          <span class="card-tag">Готовая сборка</span>
+        </div>
+        <div class="card-icon-row">
+          <div class="card-icon">🎓</div>
+          <div><div class="card-price">9 990 ₽</div></div>
+        </div>
+        <h3>AI-куратор онлайн-курса</h3>
+        <p class="card-desc">Готовый бот-куратор для онлайн-школы или курса. Отвечает студентам по программе, проверяет ДЗ с обратной связью, напоминает про дедлайны, мотивирует, передаёт сложные кейсы человеку.</p>
+
+        <div style="background: var(--bg-3); border-radius: 8px; padding: 14px 16px; margin-bottom: 16px; font-size: 13px;">
+          <div style="color: var(--accent-light); font-weight: 600; margin-bottom: 8px;">📍 Для чего</div>
+          <div style="color: var(--text-2); margin-bottom: 12px;">Разгрузить куратора и эксперта от рутины. По кейсу из BotHelp: стоимость одного занятия упала с 2 000 ₽ до 240 ₽ — в 10 раз.</div>
+          <div style="color: var(--accent-light); font-weight: 600; margin-bottom: 8px;">⚙ Как применять</div>
+          <div style="color: var(--text-2);">Загружаете программу курса в knowledge → подключаете Telegram-бота с уникальной ссылкой для каждого потока → студенты пишут боту вопросы → ответы идут из вашей программы, дополнительно — мотивационные касания.</div>
+        </div>
+
+        <ul class="card-bullets">
+          <li>Ответы по программе курса (RAG по урокам)</li>
+          <li>Проверка ДЗ с разбором ошибок</li>
+          <li>Напоминания о дедлайнах и доходимости</li>
+          <li>Передача «сложного» куратору-человеку</li>
+          <li>Статистика по студенту: где буксует</li>
+        </ul>
+
+        <div class="card-bottom">
+          <div class="card-target">школы, продюсеры, авторы курсов</div>
+          <div class="card-cta">Подробнее →</div>
+        </div>
+      </div>
+
+      <!-- AI-админ для услугового бизнеса -->
+      <div class="card" onclick="alert('Здесь будет страница /p/ai-business-admin')" style="cursor: pointer;">
+        <div class="card-tag-row">
+          <span class="card-tag hot">HOT</span>
+          <span class="card-tag">Услуговый бизнес</span>
+          <span class="card-tag">Готовая сборка</span>
+        </div>
+        <div class="card-icon-row">
+          <div class="card-icon">💇</div>
+          <div><div class="card-price">7 990 ₽</div></div>
+        </div>
+        <h3>AI-админ для салона / клиники / студии</h3>
+        <p class="card-desc">Готовый Telegram-бот, который записывает клиентов, отвечает на типовые вопросы, рассказывает про услуги и цены, передаёт горячих администратору в личный чат. Работает 24/7, в т.ч. по ночам и в выходные.</p>
+
+        <div style="background: var(--bg-3); border-radius: 8px; padding: 14px 16px; margin-bottom: 16px; font-size: 13px;">
+          <div style="color: var(--accent-light); font-weight: 600; margin-bottom: 8px;">📍 Для чего</div>
+          <div style="color: var(--text-2); margin-bottom: 12px;">Не терять клиентов из-за медленных ответов. По данным data-metrics.ru: в стоматологиях 77% звонящих уходят без записи. Сокращение ответа с 40 до 20 секунд = +12 записей в день = ~300 000 ₽/мес.</div>
+          <div style="color: var(--accent-light); font-weight: 600; margin-bottom: 8px;">⚙ Как применять</div>
+          <div style="color: var(--text-2);">Загружаете прайс и список услуг в knowledge → подключаете Telegram/WhatsApp-бот → ставите ссылку на бот в Instagram/сайте/визитках → клиенты пишут боту → горячие летят админу.</div>
+        </div>
+
+        <ul class="card-bullets">
+          <li>Запись через Telegram/WhatsApp</li>
+          <li>Интеграция с YCLIENTS / 1С:Салон</li>
+          <li>FAQ по услугам, ценам, акциям</li>
+          <li>Передача горячих лидов администратору</li>
+          <li>Напоминания о визите за день и за час</li>
+        </ul>
+
+        <div class="card-bottom">
+          <div class="card-target">салоны, клиники, фитнес, студии</div>
+          <div class="card-cta">Подробнее →</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="text-align: center; margin-top: 24px; color: var(--text-3); font-size: 13px;">
+      💡 Нишевые сборки идут поверх любой базовой команды — установщик автоматически подключит нужные роли и скиллы.
+    </div>
+  </div>
+</section>
+
+<!-- ADDONS · доп.скиллы -->
+<section id="addons">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Дополнения</span>
+      <h2>Доп.скиллы для любой команды</h2>
+      <p>Купите базовую команду — добавьте сверху узкоспециализированные навыки. Подключаются прямо в установщике.</p>
+    </div>
+
+    <div style="background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;">
+
+      <!-- AIStack Originals -->
+      <div style="padding: 22px 26px; border-bottom: 1px solid var(--border);">
+        <div style="font-size: 13px; color: var(--accent-light); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; margin-bottom: 14px;">⭐ AIStack Originals · готовые Claude-проекты</div>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--bg-3); border-radius: 8px;">
+            <span>⚖ Compliance Auditor (юр.защита РФ)</span>
+            <span style="font-family: var(--mono); color: var(--accent-light); font-weight: 700;">999 ₽</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--bg-3); border-radius: 8px;">
+            <span>📑 VSL High Ticket</span>
+            <span style="font-family: var(--mono); color: var(--accent-light); font-weight: 700;">999 ₽</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--bg-3); border-radius: 8px;">
+            <span>🎯 Аватар клиента по керну</span>
+            <span style="font-family: var(--mono); color: var(--accent-light); font-weight: 700;">999 ₽</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--bg-3); border-radius: 8px;">
+            <span>📦 Offer by Dymshakov</span>
+            <span style="font-family: var(--mono); color: var(--accent-light); font-weight: 700;">999 ₽</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--bg-3); border-radius: 8px;">
+            <span>📊 Perfect Slides</span>
+            <span style="font-family: var(--mono); color: var(--accent-light); font-weight: 700;">999 ₽</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--bg-3); border-radius: 8px;">
+            <span>💰 Хармози · $100M Offers</span>
+            <span style="font-family: var(--mono); color: var(--accent-light); font-weight: 700;">999 ₽</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--bg-3); border-radius: 8px;">
+            <span>🎬 Matt Gray · YouTube Style</span>
+            <span style="font-family: var(--mono); color: var(--accent-light); font-weight: 700;">999 ₽</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--bg-3); border-radius: 8px; opacity: 0.6;">
+            <span>+ ещё проекты подвозим</span>
+            <span style="font-family: var(--mono); color: var(--text-3); font-weight: 700;">скоро</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Боты и лидген -->
+      <div style="padding: 22px 26px; border-bottom: 1px solid var(--border);">
+        <div style="font-size: 13px; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; margin-bottom: 14px;">🤖 Боты и лидген</div>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--bg-3); border-radius: 8px;">
+            <span>❓ Квиз-бот «диагностика»</span>
+            <span style="font-family: var(--mono); color: var(--accent-light); font-weight: 700;">499 ₽</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--bg-3); border-radius: 8px;">
+            <span>📥 Бот-приёмная 24/7</span>
+            <span style="font-family: var(--mono); color: var(--accent-light); font-weight: 700;">499 ₽</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--bg-3); border-radius: 8px;">
+            <span>🧮 Бот-калькулятор стоимости</span>
+            <span style="font-family: var(--mono); color: var(--accent-light); font-weight: 700;">499 ₽</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--bg-3); border-radius: 8px;">
+            <span>📩 Лид-магнит «получи PDF»</span>
+            <span style="font-family: var(--mono); color: var(--accent-light); font-weight: 700;">299 ₽</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Базовые навыки -->
+      <div style="padding: 22px 26px;">
+        <div style="font-size: 13px; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; margin-bottom: 14px;">📚 Базовые скиллы</div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+          <div style="display: flex; justify-content: space-between; padding: 8px 12px; background: var(--bg-3); border-radius: 6px; font-size: 13px;">
+            <span>Telegram-посты</span><span style="font-family: var(--mono); color: var(--text-2);">299 ₽</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 8px 12px; background: var(--bg-3); border-radius: 6px; font-size: 13px;">
+            <span>Сценарии Reels</span><span style="font-family: var(--mono); color: var(--text-2);">299 ₽</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 8px 12px; background: var(--bg-3); border-radius: 6px; font-size: 13px;">
+            <span>Квалификация лидов</span><span style="font-family: var(--mono); color: var(--text-2);">299 ₽</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 8px 12px; background: var(--bg-3); border-radius: 6px; font-size: 13px;">
+            <span>Работа с возражениями</span><span style="font-family: var(--mono); color: var(--text-2);">299 ₽</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 8px 12px; background: var(--bg-3); border-radius: 6px; font-size: 13px;">
+            <span>Промпты Midjourney</span><span style="font-family: var(--mono); color: var(--text-2);">299 ₽</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 8px 12px; background: var(--bg-3); border-radius: 6px; font-size: 13px;">
+            <span>Email-рассылки</span><span style="font-family: var(--mono); color: var(--text-2);">299 ₽</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 8px 12px; background: var(--bg-3); border-radius: 6px; font-size: 13px;">
+            <span>Анализ конкурентов</span><span style="font-family: var(--mono); color: var(--text-2);">299 ₽</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 8px 12px; background: var(--bg-3); border-radius: 6px; font-size: 13px;">
+            <span>Анализ воронки</span><span style="font-family: var(--mono); color: var(--text-2);">299 ₽</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 8px 12px; background: var(--bg-3); border-radius: 6px; font-size: 13px;">
+            <span>+ ещё 14 скиллов</span><span style="font-family: var(--mono); color: var(--text-3);">299–499 ₽</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 24px; color: var(--text-3); font-size: 13px;">
+      💡 Все доп.скиллы включены во флагман «полная команда». В базовых командах — подключаются опционально при сборке.
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Как это работает</span>
+      <h2>От оплаты до работающего AI — один вечер</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <h4>Купили</h4>
+        <p>Выбрали сборку → ЮKassa → пришёл уникальный пароль доступа в Telegram.</p>
+        <div class="step-time">~ 2 минуты</div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h4>Получили ссылку</h4>
+        <p>В Telegram придёт пароль доступа + персональная ссылка на установщик. Только для вас.</p>
+        <div class="step-time">~ 2 минуты после оплаты</div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h4>Запустили скрипт</h4>
+        <p>Скачали персональный setup → одна команда в терминал → preflight → установка.</p>
+        <div class="step-time">~ 15 минут</div>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <h4>Работает</h4>
+        <p>Боты онлайн, скиллы подключены, веб-UI на localhost:18789. Дальше — задаёте контекст бизнеса.</p>
+        <div class="step-time">~ 30 минут</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INSTALLER · главная технология -->
+<section style="background: linear-gradient(180deg, transparent, rgba(124,92,255,0.04));">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Главная технология</span>
+      <h2>Установщик — сердце AIStack</h2>
+      <p>Один универсальный wizard собирает разные AI-команды под разные задачи. Это то, чего нет у других.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 32px; align-items: stretch;">
+
+      <!-- LEFT: Installer mockup -->
+      <div style="background: #0a0c0a; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; font-family: var(--mono); display: flex; flex-direction: column;">
+        <div style="background: var(--bg-3); padding: 10px 14px; display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--text-2); border-bottom: 1px solid var(--border);">
+          <div style="display: flex; gap: 6px;">
+            <div style="width: 11px; height: 11px; border-radius: 50%; background: #ff5f56;"></div>
+            <div style="width: 11px; height: 11px; border-radius: 50%; background: #ffbd2e;"></div>
+            <div style="width: 11px; height: 11px; border-radius: 50%; background: #27c93f;"></div>
+          </div>
+          <div style="flex: 1; text-align: center;">aistack-installer · v1.2</div>
+          <div style="color: var(--green);">● authorized</div>
+        </div>
+        <div style="padding: 20px; flex: 1; font-size: 12px;">
+          <div style="color: var(--green);">$ ./generate_personal_team</div>
+          <div style="color: var(--text-3); margin: 4px 0 14px;">// шаг 4 из 7 · команда</div>
+          <div style="color: #d4e0d4;">
+            <div style="background: rgba(124,92,255,0.08); border: 1px solid var(--accent); padding: 8px 10px; border-radius: 6px; margin-bottom: 4px;">
+              <span style="color: var(--accent);">✓</span> <strong>Агент.exe</strong> · координатор <span style="color: var(--text-3); font-size: 10px;">REQ</span>
+            </div>
+            <div style="background: rgba(124,92,255,0.08); border: 1px solid var(--accent); padding: 8px 10px; border-radius: 6px; margin-bottom: 4px;">
+              <span style="color: var(--accent);">✓</span> <strong>Продюсер</strong> · стратегия
+            </div>
+            <div style="background: rgba(124,92,255,0.08); border: 1px solid var(--accent); padding: 8px 10px; border-radius: 6px; margin-bottom: 4px;">
+              <span style="color: var(--accent);">✓</span> <strong>Маркетолог</strong> · аналитика
+            </div>
+            <div style="background: rgba(124,92,255,0.08); border: 1px solid var(--accent); padding: 8px 10px; border-radius: 6px; margin-bottom: 4px;">
+              <span style="color: var(--accent);">✓</span> <strong>Копирайтер</strong> · тексты
+            </div>
+            <div style="background: var(--bg-3); border: 1px solid var(--border); padding: 8px 10px; border-radius: 6px; margin-bottom: 4px; color: var(--text-3);">
+              <span>○</span> Технарь · код
+            </div>
+            <div style="background: rgba(124,92,255,0.08); border: 1px solid var(--accent); padding: 8px 10px; border-radius: 6px; margin-bottom: 4px;">
+              <span style="color: var(--accent);">✓</span> <strong>Контент-агент</strong> · видео
+            </div>
+            <div style="background: rgba(124,92,255,0.08); border: 1px solid var(--accent); padding: 8px 10px; border-radius: 6px; margin-bottom: 4px;">
+              <span style="color: var(--accent);">✓</span> <strong>Переговорщик</strong> · заявки
+            </div>
+            <div style="background: var(--bg-3); border: 1px solid var(--border); padding: 8px 10px; border-radius: 6px; color: var(--text-3);">
+              <span>○</span> Дизайнер · визуал
+            </div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border);">
+            <span style="color: var(--text-3); font-size: 11px;">выбрано: 6 из 8</span>
+            <span style="background: var(--accent); color: white; padding: 6px 14px; border-radius: 6px; font-weight: 600; font-size: 11px;">далее →</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: features -->
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div style="background: var(--bg-2); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px;">
+          <div style="font-weight: 700; font-size: 15px; margin-bottom: 4px;">🔐 Привязка к одному Telegram</div>
+          <div style="font-size: 13px; color: var(--text-2);">Пароль работает только с вашим аккаунтом. Передать другому или продать — нельзя.</div>
+        </div>
+        <div style="background: var(--bg-2); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px;">
+          <div style="font-weight: 700; font-size: 15px; margin-bottom: 4px;">⚡ Preflight-чек системы</div>
+          <div style="font-size: 13px; color: var(--text-2);">Установщик сам проверит Node, Git, Chrome — если чего-то нет, даст команду установки.</div>
+        </div>
+        <div style="background: var(--bg-2); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px;">
+          <div style="font-weight: 700; font-size: 15px; margin-bottom: 4px;">🧠 Hermes как память</div>
+          <div style="font-size: 13px; color: var(--text-2);">Долговременная память без эмбеддингов — команда помнит клиентов и проекты неделями.</div>
+        </div>
+        <div style="background: var(--bg-2); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px;">
+          <div style="font-weight: 700; font-size: 15px; margin-bottom: 4px;">🛠 Свои скиллы в редакторе</div>
+          <div style="font-size: 13px; color: var(--text-2);">Добавляйте свои инструкции прямо в установщике — будут в bundle.zip как ваши личные навыки.</div>
+        </div>
+        <div style="background: var(--bg-2); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px;">
+          <div style="font-weight: 700; font-size: 15px; margin-bottom: 4px;">📊 Dashboard команды</div>
+          <div style="font-size: 13px; color: var(--text-2);">Видите кто что делает, где загрузка зашкаливает, кому что передать.</div>
+        </div>
+        <p style="font-size: 12px; color: var(--text-3); margin-top: 8px;">Доступ к установщику высылается персональной ссылкой после оплаты — не открыт публично.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- STACK COMPAT -->
+<section id="stack">
+  <div class="container">
+    <div class="stack-bar">
+      <div>
+        <h3>Работает поверх вашего стека</h3>
+        <p>Не отдельное приложение — слой поверх популярных AI-CLI агентов. Не нужно ломать существующие интеграции.</p>
+      </div>
+      <div class="stack-logos">
+        <div class="stack-logo">OpenClaw</div>
+        <div class="stack-logo">Claude Code</div>
+        <div class="stack-logo">Anthropic API</div>
+        <div class="stack-logo">OpenAI / GPT</div>
+        <div class="stack-logo">ProxyAPI (РФ)</div>
+        <div class="stack-logo">Telegram Bot</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROOF / NUMBERS -->
+<section>
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Цифры рынка</span>
+      <h2>Почему это окупается</h2>
+    </div>
+    <div class="proof-grid">
+      <div class="proof-card">
+        <div class="proof-stat">×10</div>
+        <div class="proof-label">снижение стоимости занятия в онлайн-школе</div>
+        <div class="proof-source">кейс из BotHelp: с 2 000 ₽ до 240 ₽ за счёт AI-куратора</div>
+      </div>
+      <div class="proof-card">
+        <div class="proof-stat">+300 000 ₽/мес</div>
+        <div class="proof-label">прирост для стоматологии от 24/7 ответа</div>
+        <div class="proof-source">data-metrics.ru: сокращение ответа с 40 до 20 сек = +12 записей в день</div>
+      </div>
+      <div class="proof-card">
+        <div class="proof-stat">77%</div>
+        <div class="proof-label">звонящих в салоны уходят без записи</div>
+        <div class="proof-source">средний показатель по стоматологиям — конверсия 23% (data-metrics.ru)</div>
+      </div>
+      <div class="proof-card">
+        <div class="proof-stat">×5</div>
+        <div class="proof-label">дешевле, чем кастомная разработка под ключ</div>
+        <div class="proof-source">200-300 тыс. ₽ в агентстве vs 14-49 тыс. ₽ у нас</div>
+      </div>
+      <div class="proof-card">
+        <div class="proof-stat">37%</div>
+        <div class="proof-label">рабочего дня B2B-менеджера на рутину</div>
+        <div class="proof-source">vc.ru: квалификация, КП, заполнение CRM</div>
+      </div>
+      <div class="proof-card">
+        <div class="proof-stat">0 ₽/мес</div>
+        <div class="proof-label">подписок</div>
+        <div class="proof-source">только разовая покупка · доступ навсегда · обновления первый год</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="service">
+  <div class="container">
+    <div class="service-block">
+      <span class="eyebrow" style="color: var(--accent-light);">Не хотите разбираться сами</span>
+      <h2>Настроим под ваш бизнес</h2>
+      <p>Купили сборку, но времени и желания возиться нет. Делаем за вас: подключаем, настраиваем под ваш контекст, проводим обучение.</p>
+      <div class="service-tiers">
+        <div class="tier">
+          <div class="tier-name">Базовый</div>
+          <div class="tier-price">9 900 ₽</div>
+          <div class="tier-desc">Подключим готовую сборку в ваш аккаунт. 30 мин обучения. Готовые шаблоны заполнения.</div>
+        </div>
+        <div class="tier">
+          <div class="tier-name">Стандарт</div>
+          <div class="tier-price">29 900 ₽</div>
+          <div class="tier-desc">Базовый + кастомизация под ваш бизнес: промпт под нишу, knowledge-файлы, интеграция с CRM.</div>
+        </div>
+        <div class="tier">
+          <div class="tier-name">Энтерпрайз</div>
+          <div class="tier-price">89 000 ₽</div>
+          <div class="tier-desc">Полный AI-стек под задачу: команда из 3-5 агентов + интеграции + поддержка 1 месяц.</div>
+        </div>
+      </div>
+      <a class="btn btn-lg" href="https://t.me/superwalletsru" target="_blank">Оставить заявку в Telegram</a>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Часто спрашивают</span>
+      <h2>Вопросы</h2>
+    </div>
+    <div class="faq-list">
+
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-question">Чем это отличается от ChatGPT и обычного Claude?</div>
+        <div class="faq-answer">ChatGPT — это пустой чат, в котором надо каждый раз объяснять что вы хотите. Наша сборка — это готовый AI с пропитанным контекстом бизнеса, набором инструментов (MCP, Telegram, CRM) и системой ролей. Купили салонную сборку — у вас сразу администратор, который знает что отвечать про прайс и записывает клиентов.</div>
+      </div>
+
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-question">Нужен ли мне опыт в программировании?</div>
+        <div class="faq-answer">Нет. Установщик ставит OpenClaw и все сборки автоматически — одной командой в терминал. Если совсем не хотите даже терминал открывать — берёте услугу «Настроим под ключ», делаем за вас.</div>
+      </div>
+
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-question">Что я получу за оплату?</div>
+        <div class="faq-answer">Уникальный пароль доступа в Telegram → ссылку на персональный установщик → bundle.zip с настроенными скиллами и system prompts. Доступ остаётся навсегда. В первый год вы получаете все обновления сборки бесплатно.</div>
+      </div>
+
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-question">Где открыть установщик после покупки?</div>
+        <div class="faq-answer">Ссылку на установщик и пароль доступа высылаем в Telegram сразу после оплаты. Сам установщик не опубликован — это персональный доступ для каждого клиента. Установщик — это веб-страница, ничего ставить не нужно: открываете, вводите пароль + ваш Telegram, проходите wizard за 10 минут, скачиваете персональный bundle и запускаете setup.</div>
+      </div>
+
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-question">А Claude Pro / API ключ нужен отдельно?</div>
+        <div class="faq-answer">Да. AIStack — это слой поверх существующих AI-CLI агентов и LLM-провайдеров. Подписка Claude или API-ключ Anthropic/OpenAI/ProxyAPI оплачивается отдельно. На старте хватит ProxyAPI пакета за 500 ₽ — для теста.</div>
+      </div>
+
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-question">Можно ли передать сборку другому человеку?</div>
+        <div class="faq-answer">Нет. Каждая сборка привязывается к одному Telegram-аккаунту. Пароль одноразовый. Это защита от перепродажи и одновременно гарантия что вы не потеряете доступ.</div>
+      </div>
+
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-question">Что если не подойдёт?</div>
+        <div class="faq-answer">14 дней на возврат. Если в течение 14 дней сборка не подошла под вашу задачу — вернём деньги без объяснений. Без условий «не запускали → не вернём» — вы не теряете ничего.</div>
+      </div>
+
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-question">Где данные клиентов и токены?</div>
+        <div class="faq-answer">Везде на вашей машине. AIStack — не SaaS, наши серверы ничего не хранят. Токены ботов, API-ключи, переписки клиентов остаются у вас в ~/.openclaw на вашем компьютере или VPS. Это безопаснее любых облачных альтернатив.</div>
+      </div>
+
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-question">Это разовая покупка или подписка?</div>
+        <div class="faq-answer">Только разовая покупка. Купили — пользуетесь навсегда. Никаких абонентских платежей в нашу сторону. Расходы только на сам Claude / OpenAI API и хостинг ваших ботов — но это в любом случае оплачивается напрямую провайдерам.</div>
+      </div>
+
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-question">Чем отличается от того, чтобы собрать всё самому в ChatGPT/Claude?</div>
+        <div class="faq-answer">Технически можно собрать всё руками. На практике это 3-6 месяцев работы: написать system prompts, подобрать MCP, собрать knowledge-базу, отладить интеграции с Telegram и CRM, протестировать на 100+ сценариях. Мы это уже сделали и упаковали — вы получаете готовый результат за вечер вместо полугода своей работы.</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-block">
+  <div class="container">
+    <h2>Каждый день промедления — потерянные клиенты</h2>
+    <p>Запустите своего AI за один вечер.</p>
+    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+      <a class="btn btn-lg" href="#products">Открыть каталог →</a>
+      <a class="btn btn-lg btn-outline" href="https://t.me/superwalletsru" target="_blank">Задать вопрос</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <div class="logo" style="margin-bottom: 12px;"><div class="logo-icon">A</div>AI<span>Stack</span></div>
+        <p>Готовые AI-сборки для услугового бизнеса и экспертов. Не курс. Не подписка. Купил один раз — пользуешься.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Каталог</h5>
+        <a href="#products">Топ-5 сборок</a>
+        <a href="#">AIStack Originals</a>
+        <a href="#">Боты и лид-магниты</a>
+        <a href="#">Сайты под нишу</a>
+      </div>
+      <div class="footer-col">
+        <h5>Клиентам</h5>
+        <a href="#service">Услуги настройки</a>
+        <a href="#faq">FAQ</a>
+        <a href="https://t.me/superwalletsru" target="_blank">Поддержка @superwalletsru</a>
+      </div>
+      <div class="footer-col">
+        <h5>Документы</h5>
+        <a href="#">Оферта</a>
+        <a href="#">Политика конфиденциальности</a>
+        <a href="#">Условия возврата</a>
+        <a href="#">Реквизиты</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2026 AIStack. Все права защищены.</div>
+      <div>ИП Болдырева Е. А. · ОГРНИП · 14 дней на возврат</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // тёплый клик с прокруткой
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const id = a.getAttribute('href').slice(1);
+      if (!id) return;
+      const el = document.getElementById(id);
+      if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth' }); }
+    });
+  });
+</script>
+
+</body>
+</html>

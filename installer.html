@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIStack · Private Installer v2</title>
+<style>
+  :root {
+    --bg: #0a0c0a; --bg-2: #0f120f; --bg-3: #161a16;
+    --border: #2a2e2a; --border-2: #3a4a3a;
+    --text: #d4e0d4; --text-2: #6f7c6f; --text-3: #4a554a;
+    --accent: #ff5a36; --green: #6dffaf; --green-dim: #2a8a5a;
+    --yellow: #ffb84d; --red: #ff5577; --blue: #5ab8ff; --purple: #c97aff;
+    --mono: 'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text); font-family: var(--mono);
+    font-size: 14px; line-height: 1.55;
+    background-image:
+      radial-gradient(circle at 20% 0%, rgba(255,90,54,0.04) 0%, transparent 50%),
+      radial-gradient(circle at 80% 100%, rgba(90,184,255,0.04) 0%, transparent 50%);
+  }
+  a { color: var(--green); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .container { max-width: 880px; margin: 0 auto; padding: 32px 24px; }
+  .term-bar {
+    background: var(--bg-3); border: 1px solid var(--border);
+    padding: 8px 14px; border-radius: 10px 10px 0 0;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 12px; color: var(--text-2);
+  }
+  .term-dots { display: flex; gap: 6px; }
+  .term-dot { width: 11px; height: 11px; border-radius: 50%; background: var(--bg); border: 1px solid var(--border-2); }
+  .term-dot.red { background: #ff5f56; }
+  .term-dot.yellow { background: #ffbd2e; }
+  .term-dot.green { background: #27c93f; }
+  .term-title { flex: 1; text-align: center; }
+  .term-status::before { content: "● "; }
+  .term-status.locked { color: var(--red); }
+  .term-status.authorized { color: var(--green); }
+  .terminal { background: var(--bg-2); border: 1px solid var(--border); border-top: none; border-radius: 0 0 10px 10px; padding: 28px; min-height: 500px; }
+  .progress { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px dashed var(--border); }
+  .progress-row { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-2); margin-bottom: 10px; letter-spacing: 0.05em; text-transform: uppercase; }
+  .progress-bar { height: 4px; background: var(--bg-3); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.4s ease; box-shadow: 0 0 8px rgba(255,90,54,0.5); }
+  .prompt { color: var(--text-2); margin-bottom: 8px; font-size: 13px; }
+  .prompt::before { content: "$ "; color: var(--green); }
+  .comment { color: var(--text-3); font-size: 13px; margin-bottom: 14px; }
+  .comment::before { content: "// "; }
+  h1 { font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  h2 { font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .desc { color: var(--text-2); font-size: 13px; margin-bottom: 24px; max-width: 620px; }
+  .input-group { margin-bottom: 16px; }
+  .input-label { display: block; font-size: 11px; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .input-label .req { color: var(--accent); }
+  .input-wrap { position: relative; }
+  .input { width: 100%; background: var(--bg-3); border: 1px solid var(--border); color: var(--text); padding: 12px 14px; border-radius: 8px; font-family: var(--mono); font-size: 13px; }
+  .input:focus { outline: none; border-color: var(--green); background: var(--bg); }
+  .input.has-eye { padding-right: 80px; }
+  .input.valid { border-color: var(--green-dim); }
+  .input.invalid { border-color: var(--red); }
+  .eye-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: var(--text-2); cursor: pointer; padding: 4px 8px; font-family: var(--mono); font-size: 12px; }
+  .input-hint { font-size: 11px; color: var(--text-3); margin-top: 4px; }
+  .input-error { font-size: 11px; color: var(--red); margin-top: 4px; }
+  .options-grid { display: grid; gap: 10px; margin-bottom: 20px; }
+  .options-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .options-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .option { background: var(--bg-3); border: 1px solid var(--border); border-radius: 8px; padding: 14px; cursor: pointer; transition: all 0.15s ease; display: flex; align-items: flex-start; gap: 10px; }
+  .option:hover { border-color: var(--border-2); }
+  .option.selected { border-color: var(--accent); background: rgba(255,90,54,0.06); }
+  .option-check { width: 18px; height: 18px; border-radius: 4px; border: 1px solid var(--border-2); flex-shrink: 0; margin-top: 1px; position: relative; }
+  .option.selected .option-check { background: var(--accent); border-color: var(--accent); }
+  .option.selected .option-check::after { content: "✓"; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); color: white; font-size: 12px; font-weight: 700; }
+  .option-content { flex: 1; min-width: 0; }
+  .option-name { font-weight: 600; color: var(--text); margin-bottom: 3px; font-size: 13.5px; }
+  .option-desc { font-size: 12px; color: var(--text-2); }
+  .option-name .badge { display: inline-block; padding: 1px 6px; background: var(--accent); color: white; font-size: 9px; border-radius: 3px; margin-left: 6px; vertical-align: middle; font-weight: 600; }
+  .check-row { background: var(--bg-3); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; }
+  .check-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+  .check-icon.unknown { background: var(--bg); color: var(--text-3); border: 1px solid var(--border-2); }
+  .check-icon.ok { background: var(--green-dim); color: white; }
+  .check-icon.miss { background: var(--red); color: white; }
+  .check-content { flex: 1; min-width: 0; }
+  .check-name { font-weight: 600; color: var(--text); font-size: 13px; margin-bottom: 2px; }
+  .check-cmd { font-size: 11px; color: var(--text-2); background: #050605; padding: 3px 6px; border-radius: 4px; display: inline-block; margin-top: 4px; border: 1px solid var(--border); font-family: var(--mono); }
+  .check-actions { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+  .check-actions .btn-mini { background: var(--bg); color: var(--text); border: 1px solid var(--border-2); padding: 5px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; font-family: var(--mono); }
+  .check-actions .btn-mini:hover { background: var(--green-dim); border-color: var(--green-dim); }
+  .check-actions .btn-mini.copy { color: var(--green); }
+  .preset-card { background: var(--bg-3); border: 1px solid var(--border); border-radius: 10px; padding: 18px; cursor: pointer; }
+  .preset-card:hover { border-color: var(--border-2); }
+  .preset-card.selected { border-color: var(--accent); background: rgba(255,90,54,0.06); }
+  .preset-card.flagship { background: linear-gradient(135deg, rgba(124,92,255,0.10), rgba(201,122,255,0.04)); border-color: rgba(201,122,255,0.3); }
+  .preset-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .preset-title { font-weight: 700; font-size: 16px; color: var(--text); }
+  .preset-price-old { font-size: 11px; color: var(--text-3); text-decoration: line-through; display: block; }
+  .preset-price-new { font-family: var(--mono); font-size: 18px; font-weight: 700; color: var(--accent); }
+  .preset-desc { font-size: 12.5px; color: var(--text-2); margin-bottom: 10px; }
+  .preset-agents { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; padding-top: 10px; border-top: 1px dashed var(--border); }
+  .preset-agent-tag { font-size: 11px; padding: 2px 8px; background: var(--bg); border-radius: 4px; color: var(--text-2); border: 1px solid var(--border); }
+  .preset-audience { font-size: 11px; color: var(--text-3); margin-top: 4px; }
+  .agent-token-row { background: var(--bg-3); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+  .agent-token-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .agent-token-name { font-weight: 600; color: var(--text); font-size: 13.5px; }
+  .agent-token-status { font-size: 11px; }
+  .agent-token-status.ok { color: var(--green); }
+  .agent-token-status.err { color: var(--red); }
+  .knowledge-row { background: var(--bg-3); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+  .knowledge-row:hover { border-color: var(--border-2); }
+  .knowledge-row.selected { border-color: var(--accent); background: rgba(255,90,54,0.06); }
+  .knowledge-check { width: 16px; height: 16px; border-radius: 4px; border: 1px solid var(--border-2); flex-shrink: 0; position: relative; }
+  .knowledge-row.selected .knowledge-check { background: var(--accent); border-color: var(--accent); }
+  .knowledge-row.selected .knowledge-check::after { content: "✓"; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); color: white; font-size: 11px; font-weight: 700; }
+  .knowledge-name { flex: 1; font-size: 13px; color: var(--text); }
+  .knowledge-agent { font-size: 10px; padding: 2px 6px; background: var(--bg); border-radius: 4px; color: var(--text-2); border: 1px solid var(--border); }
+  .knowledge-price { font-family: var(--mono); font-size: 13px; color: var(--accent); font-weight: 700; }
+  .hermes-card { background: linear-gradient(135deg, rgba(90,184,255,0.10), rgba(109,255,175,0.04)); border: 1px solid rgba(90,184,255,0.3); border-radius: 10px; padding: 22px; margin-bottom: 16px; }
+  .hermes-head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .hermes-icon { font-size: 28px; }
+  .hermes-title { font-weight: 700; color: var(--blue); font-size: 17px; }
+  .hermes-desc { font-size: 13px; color: var(--text-2); margin-bottom: 12px; }
+  .actions { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; padding-top: 20px; border-top: 1px dashed var(--border); gap: 12px; flex-wrap: wrap; }
+  .btn { background: var(--accent); color: white; border: none; padding: 12px 22px; border-radius: 8px; font-family: var(--mono); font-size: 13px; font-weight: 600; cursor: pointer; }
+  .btn:hover:not(:disabled) { background: #ff7a5a; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-ghost { background: transparent; color: var(--text-2); border: 1px solid var(--border); }
+  .btn-ghost:hover:not(:disabled) { color: var(--text); border-color: var(--border-2); background: var(--bg-3); }
+  .btn-test { background: var(--bg); color: var(--green); border: 1px solid var(--green-dim); padding: 7px 12px; font-size: 11px; border-radius: 6px; font-family: var(--mono); cursor: pointer; }
+  .btn-blue { background: var(--blue); color: white; }
+  .warn-box { background: rgba(255,90,54,0.08); border: 1px solid rgba(255,90,54,0.3); border-radius: 8px; padding: 14px 16px; margin-bottom: 20px; font-size: 12.5px; color: var(--text); }
+  .warn-box .warn-title { font-weight: 700; color: var(--accent); margin-bottom: 4px; font-size: 12px; text-transform: uppercase; }
+  .info-box { background: rgba(90,184,255,0.06); border: 1px solid rgba(90,184,255,0.25); border-radius: 8px; padding: 12px 14px; margin-bottom: 14px; font-size: 12.5px; color: var(--text); }
+  .info-box strong { color: var(--blue); }
+  .code-block { background: #050605; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 8px; color: var(--green); font-size: 12.5px; word-break: break-all; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .code-text { flex: 1; font-family: var(--mono); }
+  .copy-btn { background: var(--bg-3); color: var(--text); border: 1px solid var(--border-2); padding: 6px 12px; border-radius: 6px; font-size: 11px; cursor: pointer; font-family: var(--mono); flex-shrink: 0; }
+  .copy-btn:hover { background: var(--accent); border-color: var(--accent); }
+  .copy-btn.copied { background: var(--green-dim); border-color: var(--green-dim); color: white; }
+  .final-block { margin-bottom: 20px; }
+  .final-block-title { font-size: 11px; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+  .download-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .dl-card { background: var(--bg-3); border: 1px solid var(--border); border-radius: 8px; padding: 16px; cursor: pointer; display: flex; gap: 12px; align-items: center; color: var(--text); font-family: var(--mono); }
+  .dl-card:hover { border-color: var(--accent); }
+  .dl-card .dl-icon { width: 44px; height: 44px; border-radius: 8px; background: rgba(255,90,54,0.12); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+  .dl-card .dl-text strong { display: block; font-weight: 600; font-size: 13px; margin-bottom: 2px; }
+  .dl-card .dl-text span { color: var(--text-2); font-size: 11px; }
+  .summary { background: var(--bg-3); border: 1px dashed var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 20px; font-size: 12.5px; }
+  .summary-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border); }
+  .summary-row:last-child { border-bottom: none; }
+  .summary-key { color: var(--text-2); }
+  .summary-val { color: var(--text); font-weight: 600; text-align: right; max-width: 60%; }
+  .dry-run-output { background: #050605; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 14px; color: var(--text); font-size: 11.5px; max-height: 360px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; }
+  .dry-run-output .ok { color: var(--green); }
+  .dry-run-output .skip { color: var(--text-3); }
+  .dry-run-output .info { color: var(--blue); }
+  .dry-run-output .accent { color: var(--accent); }
+  .dry-run-output .warn { color: var(--yellow); }
+  .session-info { position: fixed; top: 16px; right: 16px; background: var(--bg-2); border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; font-size: 11px; color: var(--text-2); display: none; align-items: center; gap: 8px; z-index: 50; }
+  .session-info .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+  .clear-btn { background: transparent; border: none; color: var(--text-3); cursor: pointer; font-family: var(--mono); font-size: 11px; padding: 2px 6px; margin-left: 4px; }
+  .step { display: none; }
+  .step.active { display: block; }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(140%); background: var(--green); color: var(--bg); padding: 10px 18px; border-radius: 8px; font-family: var(--mono); font-size: 13px; font-weight: 600; transition: transform 0.3s ease; z-index: 100; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.error { background: var(--red); color: white; }
+  @media (max-width: 700px) {
+    .container { padding: 16px 12px; }
+    .terminal { padding: 18px; }
+    .options-grid.cols-3, .options-grid.cols-2 { grid-template-columns: 1fr; }
+    .download-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="session-info" id="session-info">
+  <span class="dot"></span>
+  <span>session · <span id="session-timer">--:--</span></span>
+  <button class="clear-btn" onclick="clearAndExit()">очистить</button>
+</div>
+
+<div class="container">
+  <div class="term-bar">
+    <div class="term-dots">
+      <div class="term-dot red"></div>
+      <div class="term-dot yellow"></div>
+      <div class="term-dot green"></div>
+    </div>
+    <div class="term-title">aistack-installer · v2.0 <span id="repo-status" style="color:var(--text-3); font-size:10px; margin-left:6px;"></span></div>
+    <div class="term-status locked" id="gate-status">locked</div>
+  </div>
+
+  <div class="terminal">
+    <div class="progress" id="progress" style="display:none;">
+      <div class="progress-row">
+        <span id="progress-name">// маршрут установки</span>
+        <span id="progress-label">шаг 1 из 7</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+
+    <!-- STEP 0: GATE -->
+    <div class="step active" id="step-gate">
+      <p class="prompt">./aistack --request access</p>
+      <p class="comment">закрытая зона. только для клиентов с купленным доступом</p>
+      <h1>AIStack · Private Installer v2</h1>
+      <p class="desc">Персональный установщик AI-команды. Поднимает OpenClaw, Hermes как Агент.exe, раскатывает workspace для всех агентов вашего пресета.</p>
+      <div class="warn-box">
+        <div class="warn-title">⚠ внимание</div>
+        Пароль выдаётся вместе с тарифом и привязывается к вашему Telegram. Передача = бан. Все ключи остаются у вас в браузере.
+      </div>
+      <div class="input-group">
+        <label class="input-label">Пароль доступа <span class="req">*</span></label>
+        <div class="input-wrap">
+          <input type="password" class="input has-eye" id="pwd-input" placeholder="OPCLAW-XXXX-XXXX-XXXX" autocomplete="off">
+          <button class="eye-btn" onclick="toggleEye('pwd-input', this)">показать</button>
+        </div>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Ваш Telegram username <span class="req">*</span></label>
+        <input type="text" class="input" id="tg-username" placeholder="@konstantin_bldr" autocomplete="off">
+      </div>
+      <div class="input-error" id="gate-error" style="display:none;"></div>
+      <div class="actions" style="border-top:none;">
+        <span class="comment" style="margin:0;">Нет доступа? @superwalletsru</span>
+        <button class="btn" onclick="checkGate()">unlock →</button>
+      </div>
+    </div>
+
+    <!-- STEP 1: PREFLIGHT + OpenClaw -->
+    <div class="step" id="step-1">
+      <p class="prompt">./preflight_and_openclaw</p>
+      <h2>Шаг 1 · Проверка системы + OpenClaw</h2>
+      <p class="desc">Проверьте базовый стек. Потом установите OpenClaw.</p>
+      <div class="input-group">
+        <label class="input-label">Ваша ОС <span class="req">*</span></label>
+        <div class="options-grid cols-3">
+          <div class="option" data-value="macos" onclick="pickSingle(this, 'os'); renderPreflight();">
+            <div class="option-check"></div>
+            <div class="option-content"><div class="option-name">macOS</div><div class="option-desc">Apple Silicon · Intel</div></div>
+          </div>
+          <div class="option" data-value="windows" onclick="pickSingle(this, 'os'); renderPreflight();">
+            <div class="option-check"></div>
+            <div class="option-content"><div class="option-name">Windows</div><div class="option-desc">PowerShell · WSL2</div></div>
+          </div>
+          <div class="option" data-value="vps" onclick="pickSingle(this, 'os'); renderPreflight();">
+            <div class="option-check"></div>
+            <div class="option-content"><div class="option-name">VPS · Linux</div><div class="option-desc">Ubuntu / Debian</div></div>
+          </div>
+        </div>
+      </div>
+      <div id="preflight-section" style="display:none;">
+        <div class="info-box"><strong>📌 Хорошая новость:</strong> вам не надо проверять и ставить это всё руками. <strong>setup-скрипт из bundle.zip сам проверит и поставит</strong> всё что не хватает. Достаточно выбрать ОС и нажать «далее». Список ниже — справочный, для тех кто хочет понимать что будет ставиться.</div>
+        <div id="preflight-list"></div>
+        <h3 style="font-size:14px; margin: 20px 0 10px;">Установка OpenClaw</h3>
+        <div id="openclaw-cmd-macos" class="os-content" style="display:none;">
+          <div class="code-block"><span class="code-text">curl -fsSL https://openclaw.ai/install.sh | bash</span><button class="copy-btn" onclick="copyText(this, 'curl -fsSL https://openclaw.ai/install.sh | bash')">copy</button></div>
+        </div>
+        <div id="openclaw-cmd-windows" class="os-content" style="display:none;">
+          <div class="code-block"><span class="code-text">iwr -useb https://openclaw.ai/install.ps1 | iex</span><button class="copy-btn" onclick="copyText(this, 'iwr -useb https://openclaw.ai/install.ps1 | iex')">copy</button></div>
+        </div>
+        <div id="openclaw-cmd-vps" class="os-content" style="display:none;">
+          <div class="code-block"><span class="code-text">curl -fsSL https://openclaw.ai/install.sh | bash</span><button class="copy-btn" onclick="copyText(this, 'curl -fsSL https://openclaw.ai/install.sh | bash')">copy</button></div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost" onclick="goBack()">← назад</button>
+        <span id="preflight-counter" class="comment" style="margin:0;"></span>
+        <button class="btn" id="btn-next-1" onclick="goNext()" disabled>далее →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: HERMES -->
+    <div class="step" id="step-2">
+      <p class="prompt">./hermes_memory</p>
+      <h2>Шаг 2 · Память команды (Hermes)</h2>
+      <p class="desc">Hermes — это «память» вашей команды. Без него агенты забывают контекст между разговорами. С ним — Агент.exe помнит ваших клиентов, проекты, прошлые решения неделями и месяцами.</p>
+
+      <div class="hermes-card">
+        <div class="hermes-head">
+          <div class="hermes-icon">🧠</div>
+          <div class="hermes-title">Что это значит на практике</div>
+        </div>
+        <div class="hermes-desc" style="margin-bottom: 0;">
+          <strong style="color: var(--text);">Без Hermes:</strong> каждое утро объясняете команде «у меня клиент Иван, ниша салон красоты, запуск 1 июня».<br>
+          <strong style="color: var(--text);">С Hermes:</strong> команда сама помнит. Спросили «как там Иван?» — отвечают без напоминаний.
+        </div>
+      </div>
+
+      <div class="input-group" style="margin-top: 20px;">
+        <label class="input-label">Подключаем Hermes?</label>
+        <div class="options-grid cols-2">
+          <div class="option" data-value="skip" onclick="pickSingle(this, 'hermes')">
+            <div class="option-check"></div>
+            <div class="option-content">
+              <div class="option-name">✓ Да, установить автоматически <span class="badge">REC</span></div>
+              <div class="option-desc">setup-скрипт сам всё поставит на ваш компьютер. Ничего делать не надо.</div>
+            </div>
+          </div>
+          <div class="option" data-value="ok" onclick="pickSingle(this, 'hermes')">
+            <div class="option-check"></div>
+            <div class="option-content">
+              <div class="option-name">⚙ У меня уже стоит</div>
+              <div class="option-desc">только для тех, кто сам поставил Hermes заранее</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box" style="margin-top: 20px;">
+        <strong>Что делает setup-скрипт:</strong> ставит Hermes в <code>~/.openclaw/hermes/</code>, запускает его как сервис на порту 7777, подключает к OpenClaw как memory-provider. На macOS через LaunchAgent, на Windows через Scheduled Task, на Linux через systemd. Команды и проверки — внутри bundle.zip, вы их не пишете руками.
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-ghost" onclick="goBack()">← назад</button>
+        <span class="comment" style="margin:0;">шаг 2 из 7</span>
+        <button class="btn" id="btn-next-2" onclick="goNext()" disabled>далее →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: LLM -->
+    <div class="step" id="step-3">
+      <p class="prompt">./set_llm_provider</p>
+      <h2>Шаг 3 · Нейросеть («мозг» команды)</h2>
+      <p class="desc">Два пути: <strong>подписка через CLI</strong> (фикс-цена, без сюрпризов) или <strong>API-ключ</strong> (плата по факту).</p>
+
+      <div class="info-box" style="margin-bottom: 20px;">
+        <strong>💡 Что выбрать:</strong> для полной AI-команды реально работает только <strong>Claude Max за $100-200/мес</strong> — у Pro за $20 быстро кончаются Agent SDK credits и агенты отваливаются. Если бюджет ограничен — берите API-ключ Anthropic с депозитом $20+ или ProxyAPI для РФ.
+      </div>
+
+      <h3 style="font-size:13px; color: var(--text-2); margin: 0 0 10px; text-transform: uppercase; letter-spacing: 0.06em;">📦 Через подписку CLI</h3>
+      <div class="options-grid cols-2" style="margin-bottom: 6px;">
+        <div class="option" data-value="claude-cli" onclick="pickSingle(this, 'provider'); validateLlmKey();">
+          <div class="option-check"></div>
+          <div class="option-content">
+            <div class="option-name">Claude Code · Max <span class="badge">REC</span></div>
+            <div class="option-desc">$100/мес (Max 5X) или $200/мес (Max) · полные Agent SDK credits для команды агентов · работает стабильно</div>
+          </div>
+        </div>
+        <div class="option" data-value="codex-cli" onclick="pickSingle(this, 'provider'); validateLlmKey();">
+          <div class="option-check"></div>
+          <div class="option-content">
+            <div class="option-name">OpenAI Codex CLI</div>
+            <div class="option-desc">$100/мес ChatGPT Pro · 5× больше Codex-запросов · альтернатива Claude Max</div>
+          </div>
+        </div>
+      </div>
+      <p class="comment" style="margin-bottom: 20px;">// Claude Pro за $20/мес тоже работает, но Agent SDK лимит всего $20 в credits — на команду из 5+ агентов хватит на 1-2 дня. На API ключе того же Anthropic — без таких лимитов, но платите по факту использования.</p>
+
+      <h3 style="font-size:13px; color: var(--text-2); margin: 0 0 10px; text-transform: uppercase; letter-spacing: 0.06em;">🔑 Через API-ключ</h3>
+      <div class="options-grid cols-3" style="margin-bottom: 16px;">
+        <div class="option" data-value="anthropic" onclick="pickSingle(this, 'provider'); validateLlmKey();">
+          <div class="option-check"></div>
+          <div class="option-content">
+            <div class="option-name">Anthropic API</div>
+            <div class="option-desc">Claude Sonnet · нужен депозит $5+</div>
+          </div>
+        </div>
+        <div class="option" data-value="openai" onclick="pickSingle(this, 'provider'); validateLlmKey();">
+          <div class="option-check"></div>
+          <div class="option-content">
+            <div class="option-name">OpenAI API</div>
+            <div class="option-desc">GPT-4o / GPT-5 · депозит</div>
+          </div>
+        </div>
+        <div class="option" data-value="proxyapi" onclick="pickSingle(this, 'provider'); validateLlmKey();">
+          <div class="option-check"></div>
+          <div class="option-content">
+            <div class="option-name">ProxyAPI 🇷🇺</div>
+            <div class="option-desc">Claude · GPT · Gemini · DeepSeek в одном кабинете · оплата ₽ · ~×3 от цены официала</div>
+          </div>
+        </div>
+        <div class="option" data-value="gemini" onclick="pickSingle(this, 'provider'); validateLlmKey();">
+          <div class="option-check"></div>
+          <div class="option-content">
+            <div class="option-name">Google Gemini</div>
+            <div class="option-desc">Gemini 2.5 Pro · бесплатный tier</div>
+          </div>
+        </div>
+        <div class="option" data-value="deepseek" onclick="pickSingle(this, 'provider'); validateLlmKey();">
+          <div class="option-check"></div>
+          <div class="option-content">
+            <div class="option-name">DeepSeek</div>
+            <div class="option-desc">DeepSeek V3 · самый дешёвый</div>
+          </div>
+        </div>
+        <div class="option" data-value="ollama" onclick="pickSingle(this, 'provider'); validateLlmKey();">
+          <div class="option-check"></div>
+          <div class="option-content">
+            <div class="option-name">Ollama (локально)</div>
+            <div class="option-desc">Llama/Qwen на своей машине · бесплатно</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="input-group" id="llm-key-group">
+        <label class="input-label" id="llm-key-label">API-ключ / токен <span class="req">*</span></label>
+        <div class="input-wrap">
+          <input type="password" class="input has-eye" id="llm-key" placeholder="зависит от провайдера" oninput="validateLlmKey()">
+          <button class="eye-btn" onclick="toggleEye('llm-key', this)">показать</button>
+        </div>
+        <div class="input-hint" id="llm-hint">сначала выберите провайдера</div>
+        <div class="input-error" id="llm-error" style="display:none;"></div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-ghost" onclick="goBack()">← назад</button>
+        <span class="comment" style="margin:0;">шаг 3 из 7</span>
+        <button class="btn" id="btn-next-3" onclick="goNext()" disabled>далее →</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: PRESET -->
+    <div class="step" id="step-4">
+      <p class="prompt">./select_team_preset</p>
+      <h2>Шаг 4 · Команда</h2>
+      <p class="desc">Один пресет = набор агентов под задачу.</p>
+      <div id="presets-list" style="display: grid; gap: 12px;"></div>
+      <div class="actions">
+        <button class="btn btn-ghost" onclick="goBack()">← назад</button>
+        <span id="preset-counter" class="comment" style="margin:0;"></span>
+        <button class="btn" id="btn-next-4" onclick="goNext()" disabled>далее →</button>
+      </div>
+    </div>
+
+    <!-- STEP 5: TG TOKENS -->
+    <div class="step" id="step-5">
+      <p class="prompt">./set_telegram_bot_tokens</p>
+      <h2>Шаг 5 · Telegram-боты</h2>
+      <p class="desc">Каждый агент = отдельный бот. Создайте в <a href="https://t.me/BotFather" target="_blank">@BotFather</a>.</p>
+      <div id="tg-tokens-wrap"></div>
+      <div class="actions">
+        <button class="btn btn-ghost" onclick="goBack()">← назад</button>
+        <span id="tg-counter" class="comment" style="margin:0;"></span>
+        <button class="btn" id="btn-next-5" onclick="goNext()" disabled>далее →</button>
+      </div>
+    </div>
+
+    <!-- STEP 6: KNOWLEDGE -->
+    <div class="step" id="step-6">
+      <p class="prompt">./pick_knowledge_addons</p>
+      <h2>Шаг 6 · Доп.knowledge (опционально)</h2>
+      <p class="desc">AIStack Originals — авторские методики, по 999 ₽. Можно пропустить.</p>
+      <div id="knowledge-list"></div>
+      <div class="actions">
+        <button class="btn btn-ghost" onclick="goBack()">← назад</button>
+        <span id="knowledge-counter" class="comment" style="margin:0;">выбрано: 0 на сумму 0 ₽</span>
+        <button class="btn" onclick="goNext()">далее →</button>
+      </div>
+    </div>
+
+    <!-- STEP 7: FINAL -->
+    <div class="step" id="step-7">
+      <p class="prompt">./generate_personal_installer ✓</p>
+      <h2>Готово · Ваш персональный установщик</h2>
+      <div class="summary" id="summary"></div>
+      <div class="final-block">
+        <div class="final-block-title">⚙ тестовая установка</div>
+        <button class="btn btn-blue" style="margin-bottom: 10px;" onclick="runDryRun()">▶ запустить dry-run</button>
+        <div class="dry-run-output" id="dry-run-output" style="display:none;"></div>
+      </div>
+      <div class="final-block">
+        <div class="final-block-title">↓ скачать персональные файлы</div>
+        <div class="download-row">
+          <a class="dl-card" onclick="downloadFile('script')">
+            <div class="dl-icon">▼</div>
+            <div class="dl-text"><strong id="dl-main-name">setup.sh</strong><span>главный скрипт</span></div>
+          </a>
+          <a class="dl-card" onclick="downloadFile('env')">
+            <div class="dl-icon">⚙</div>
+            <div class="dl-text"><strong>aistack.env</strong><span>только переменные</span></div>
+          </a>
+          <a class="dl-card" onclick="downloadFile('path')">
+            <div class="dl-icon">📋</div>
+            <div class="dl-text"><strong>installation-path.md</strong><span>пошаговая инструкция</span></div>
+          </a>
+          <a class="dl-card" onclick="downloadFile('all')">
+            <div class="dl-icon">📦</div>
+            <div class="dl-text"><strong>aistack-bundle.zip</strong><span>setup + templates + skills + knowledge</span></div>
+          </a>
+        </div>
+      </div>
+      <div class="info-box">
+        <strong>Что дальше:</strong>
+        <ol style="margin-left: 18px; margin-top: 6px;">
+          <li>Скачайте bundle.zip и распакуйте</li>
+          <li>В терминале запустите setup</li>
+          <li>Скрипт создаст workspace, поставит global_skills, скопирует knowledge</li>
+          <li>Откройте localhost:18789 или напишите Агент.exe в Telegram «привет»</li>
+          <li>Агент.exe сам задаст 5 вопросов и заполнит USER.md</li>
+        </ol>
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost" onclick="goBack()">← изменить</button>
+        <button class="btn btn-ghost" onclick="clearAndExit()">очистить ⌫</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">✓</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script>
+const ACCESS_HASH = '5f4f60a87c4458d6583ae49674772fefcdc5868d7cefae178ddba8dfe58b95d5';
+const WHITELIST_USERNAMES = ['ivanboldyrev1', 'kateboldyref', 'kostyavkoste'];
+const SESSION_TTL_MIN = 45;
+
+// ===========================================================================
+// GITHUB REPO — URL уже прописан · вставьте свой токен в кавычки
+// ===========================================================================
+const KNOWLEDGE_REPO_URL = 'https://raw.githubusercontent.com/kostyavkoste/aistack-knowledge/main';
+const KNOWLEDGE_TOKEN    = 'github_pat_ВАШ_ТОКЕН_СЮДА';
+
+const FALLBACK_MANIFEST = {
+  agents: [
+    { id:'coordinator',  name:'Агент.exe (Координатор)', emoji:'🧭' },
+    { id:'tech',         name:'Технарь',                 emoji:'🔧' },
+    { id:'producer',     name:'Продюсер',                emoji:'🎬' },
+    { id:'marketer',     name:'Маркетолог',              emoji:'📈' },
+    { id:'designer',     name:'Дизайнер',                emoji:'🎨' },
+    { id:'copywriter',   name:'Копирайтер',              emoji:'✍' },
+    { id:'contentmaker', name:'Контент-агент',           emoji:'🎥' },
+    { id:'negotiator',   name:'Переговорщик',            emoji:'🤝' },
+  ],
+  knowledge: [
+    { id:'aistack-compliance-toolkit-rf',       name:'Compliance Toolkit РФ',     agent:'coordinator', price:999 },
+    { id:'aistack-customer-avatar-method',      name:'Аватар клиента по керну',   agent:'marketer',    price:999 },
+    { id:'aistack-vsl-high-ticket-method',      name:'VSL High Ticket',           agent:'copywriter',  price:999 },
+    { id:'aistack-perfect-slides-method',       name:'Perfect Slides',            agent:'producer',    price:999 },
+    { id:'aistack-offer-dymshakov-method',      name:'Offer by Dymshakov',        agent:'marketer',    price:999 },
+    { id:'aistack-hormozi-100m-offers-method',  name:'Хармози · $100M Offers',    agent:'negotiator',  price:999 },
+    { id:'aistack-mattgray-youtube-method',     name:'Matt Gray · YouTube Style', agent:'contentmaker',price:999 },
+  ],
+  presets: [
+    { id:'content-team',  name:'Контент-команда',  emoji:'✍', price:4990,
+      description:'Копирайтер + контент-агент + дизайнер. Посты, Reels, обложки.',
+      audience:'блогеры, эксперты, SMM', agents:['copywriter','contentmaker','designer'] },
+    { id:'sales-team',    name:'Продажная команда', emoji:'🎯', price:4990,
+      description:'Координатор + переговорщик + маркетолог. Квалификация, дожим, офферы.',
+      audience:'услуговый бизнес, B2B', agents:['coordinator','negotiator','marketer'] },
+    { id:'expert-team',   name:'Команда эксперта',  emoji:'🧠', price:4990,
+      description:'Координатор + копирайтер + переговорщик.',
+      audience:'психологи, коучи, репетиторы', agents:['coordinator','copywriter','negotiator'] },
+    { id:'business-team', name:'Бизнес-команда',    emoji:'📊', price:4990,
+      description:'Продюсер + маркетолог + переговорщик. Стратегия, воронки, ROI.',
+      audience:'малый бизнес, продюсеры', agents:['producer','marketer','negotiator'] },
+    { id:'school-team',   name:'Школьная команда',  emoji:'🎓', price:4990,
+      description:'Координатор + продюсер + копирайтер. Контент курса, расписание.',
+      audience:'онлайн-школы', agents:['coordinator','producer','copywriter'] },
+    { id:'tech-team',     name:'Тех-команда',       emoji:'⚙', price:4990,
+      description:'Координатор + технарь. MCP, API, отладка, автоматизации.',
+      audience:'те, кто сам автоматизирует', agents:['coordinator','tech'] },
+    { id:'full-team',     name:'AIStack · Полная команда', emoji:'⭐', price:29990, old_price:39990,
+      description:'Все 8 ролей + Hermes + Dashboard + все 7 AIStack Originals.',
+      audience:'для тех, кому нужна вся команда сразу', flagship:true,
+      agents:['coordinator','tech','producer','marketer','designer','copywriter','contentmaker','negotiator'],
+      bundled_knowledge: ['aistack-compliance-toolkit-rf','aistack-customer-avatar-method','aistack-vsl-high-ticket-method','aistack-perfect-slides-method','aistack-offer-dymshakov-method','aistack-hormozi-100m-offers-method','aistack-mattgray-youtube-method'] },
+  ]
+};
+let MANIFEST = FALLBACK_MANIFEST;
+
+const HERMES_PREFLIGHT = {
+  macos: [
+    { id:'python3', name:'Python 3.10+', check:'python3 --version', installCmd:'brew install python@3.12' },
+    { id:'pip3',    name:'pip3', check:'pip3 --version', installCmd:'python3 -m ensurepip --upgrade' },
+    { id:'curl',    name:'curl', check:'curl --version' },
+    { id:'port-7777', name:'Порт 7777 свободен', check:'lsof -i :7777 (должно быть пусто)' },
+  ],
+  windows: [
+    { id:'python3', name:'Python 3.10+', check:'python --version' },
+    { id:'pip',     name:'pip', check:'pip --version' },
+    { id:'curl',    name:'curl', check:'Get-Command curl' },
+    { id:'port-7777', name:'Порт 7777 свободен', check:'Get-NetTCPConnection -LocalPort 7777' },
+  ],
+  vps: [
+    { id:'python3', name:'Python 3.10+', check:'python3 --version', installCmd:'sudo apt install -y python3 python3-pip' },
+    { id:'pip3',    name:'pip3', check:'pip3 --version' },
+    { id:'curl',    name:'curl', check:'curl --version', installCmd:'sudo apt install -y curl' },
+    { id:'systemd', name:'systemd', check:'systemctl --version' },
+    { id:'sudo',    name:'sudo доступ', check:'sudo -n true' },
+  ],
+};
+
+const PREFLIGHT = {
+  macos: [
+    { id:'brew', name:'Homebrew', check:'brew --version', installCmd:'/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"', docUrl:'https://brew.sh' },
+    { id:'node', name:'Node.js 22+', check:'node -v', installCmd:'brew install node@22', docUrl:'https://nodejs.org' },
+    { id:'git',  name:'Git', check:'git --version', installCmd:'brew install git', docUrl:'https://git-scm.com' },
+    { id:'chrome', name:'Google Chrome', check:'open -a "Google Chrome" --args --version', installCmd:'brew install --cask google-chrome', docUrl:'https://www.google.com/chrome' },
+  ],
+  windows: [
+    { id:'node', name:'Node.js 22+', check:'node -v', docUrl:'https://nodejs.org/en/download' },
+    { id:'git',  name:'Git for Windows', check:'git --version', docUrl:'https://git-scm.com/download/win' },
+    { id:'chrome', name:'Google Chrome', check:'(Test-Path "$env:ProgramFiles\\Google\\Chrome\\Application\\chrome.exe")', docUrl:'https://www.google.com/chrome' },
+    { id:'pwsh', name:'PowerShell 5.1+', check:'$PSVersionTable.PSVersion' },
+  ],
+  vps: [
+    { id:'curl', name:'curl', check:'curl --version', installCmd:'sudo apt install -y curl' },
+    { id:'node', name:'Node.js 22+', check:'node -v', installCmd:'curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash - && sudo apt install -y nodejs' },
+    { id:'git',  name:'Git', check:'git --version', installCmd:'sudo apt install -y git' },
+  ],
+};
+
+const state = {
+  step: 0, tgUsername: '', os: null, preflight: {}, hermes: null, hermesPreflight: {},
+  provider: null, llmKey: '', preset: null, tgTokens: {}, selectedKnowledge: new Set(),
+  sessionStart: null,
+};
+
+function loadSession() {
+  try {
+    const raw = sessionStorage.getItem('aistack-installer-v2');
+    if (!raw) return;
+    const s = JSON.parse(raw);
+    Object.assign(state, s);
+    state.selectedKnowledge = new Set(s.selectedKnowledge || []);
+  } catch (e) {}
+}
+function saveSession() {
+  const s = { ...state, selectedKnowledge: Array.from(state.selectedKnowledge) };
+  sessionStorage.setItem('aistack-installer-v2', JSON.stringify(s));
+}
+function clearAndExit() {
+  sessionStorage.removeItem('aistack-installer-v2');
+  location.reload();
+}
+
+async function sha256(str) {
+  const buf = new TextEncoder().encode(str);
+  const hash = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function checkGate() {
+  const pwdEl = document.getElementById('pwd-input');
+  const tgEl  = document.getElementById('tg-username');
+  const errEl = document.getElementById('gate-error');
+  const pwd = pwdEl.value.trim();
+  const tg  = tgEl.value.trim().replace(/^@/, '').toLowerCase();
+  if (!pwd || !tg) { errEl.textContent = 'Введите пароль и Telegram'; errEl.style.display = 'block'; return; }
+  const h = await sha256(pwd);
+  if (h !== ACCESS_HASH) { errEl.textContent = 'Пароль не подходит'; errEl.style.display = 'block'; pwdEl.classList.add('invalid'); setTimeout(() => pwdEl.classList.remove('invalid'), 600); return; }
+  if (WHITELIST_USERNAMES.length > 0 && !WHITELIST_USERNAMES.includes(tg)) { errEl.textContent = `@${tg} не в списке доступа. @superwalletsru.`; errEl.style.display = 'block'; return; }
+  errEl.style.display = 'none';
+  state.tgUsername = tg;
+  state.sessionStart = Date.now();
+  document.getElementById('gate-status').textContent = 'authorized';
+  document.getElementById('gate-status').className = 'term-status authorized';
+  saveSession();
+  goToStep(1);
+  startSessionTimer();
+}
+
+let timerInt = null;
+function startSessionTimer() {
+  document.getElementById('session-info').style.display = 'flex';
+  clearInterval(timerInt);
+  timerInt = setInterval(updateSessionTimer, 1000);
+  updateSessionTimer();
+}
+function updateSessionTimer() {
+  if (!state.sessionStart) return;
+  const elapsed = (Date.now() - state.sessionStart) / 1000;
+  const remaining = Math.max(0, SESSION_TTL_MIN * 60 - elapsed);
+  const m = String(Math.floor(remaining / 60)).padStart(2, '0');
+  const s = String(Math.floor(remaining % 60)).padStart(2, '0');
+  document.getElementById('session-timer').textContent = `${m}:${s}`;
+  if (remaining === 0) clearAndExit();
+}
+
+const STEP_NAMES = ['', 'preflight + openclaw', 'hermes', 'нейросеть', 'команда', 'telegram-боты', 'доп.knowledge', 'установщик'];
+function goToStep(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById(n === 0 ? 'step-gate' : 'step-' + n).classList.add('active');
+  state.step = n;
+  saveSession();
+  if (n >= 1) {
+    document.getElementById('progress').style.display = 'block';
+    document.getElementById('progress-fill').style.width = (n / 7 * 100) + '%';
+    document.getElementById('progress-label').textContent = `шаг ${n} из 7`;
+    document.getElementById('progress-name').textContent = '// ' + STEP_NAMES[n];
+  } else document.getElementById('progress').style.display = 'none';
+  if (n === 2) renderHermesPreflight();
+  if (n === 4) renderPresets();
+  if (n === 5) renderTgTokens();
+  if (n === 6) renderKnowledge();
+  if (n === 7) renderFinal();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function goNext() { if (state.step < 7) goToStep(state.step + 1); }
+function goBack() { if (state.step > 1) goToStep(state.step - 1); }
+
+function pickSingle(el, key) {
+  el.parentElement.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  state[key] = el.dataset.value;
+  saveSession();
+  if (key === 'hermes') updateHermesNextBtn();
+  if (key === 'preset') selectPreset(el.dataset.value);
+}
+function updateHermesNextBtn() {
+  if (state.hermes === 'skip') { document.getElementById('btn-next-2').disabled = false; return; }
+  if (state.hermes === 'ok') {
+    const items = HERMES_PREFLIGHT[state.os] || [];
+    const ok = items.filter(it => (state.hermesPreflight || {})[it.id] === 'ok').length;
+    document.getElementById('btn-next-2').disabled = ok < items.length;
+    return;
+  }
+  document.getElementById('btn-next-2').disabled = true;
+}
+
+function renderPreflight() {
+  const items = PREFLIGHT[state.os] || [];
+  document.getElementById('preflight-section').style.display = 'block';
+  const wrap = document.getElementById('preflight-list');
+  wrap.innerHTML = items.map(it => {
+    const st = state.preflight[it.id] || 'unknown';
+    const icon = st === 'ok' ? '✓' : st === 'miss' ? '✗' : '?';
+    return `<div class="check-row">
+      <div class="check-icon ${st}">${icon}</div>
+      <div class="check-content"><div class="check-name">${it.name}</div><span class="check-cmd">${it.check}</span></div>
+      <div class="check-actions">
+        <button class="btn-mini copy" onclick="copyText(this, ${JSON.stringify(it.check)})">copy</button>
+        ${it.installCmd ? `<button class="btn-mini copy" onclick="copyText(this, ${JSON.stringify(it.installCmd)})">copy install</button>` : ''}
+        ${it.docUrl ? `<a class="btn-mini" href="${it.docUrl}" target="_blank">сайт ↗</a>` : ''}
+        <button class="btn-mini" style="background:var(--green-dim); color:white;" onclick="markPreflight('${it.id}','ok')">✓ есть</button>
+        <button class="btn-mini" style="background:rgba(255,85,119,0.2); color:var(--red); border-color:var(--red);" onclick="markPreflight('${it.id}','miss')">✗ нет</button>
+      </div>
+    </div>`;
+  }).join('');
+  document.querySelectorAll('#step-1 .os-content').forEach(c => c.style.display = 'none');
+  const oc = document.getElementById('openclaw-cmd-' + state.os);
+  if (oc) oc.style.display = 'block';
+  updatePreflightCounter();
+}
+function markPreflight(id, status) { state.preflight[id] = status; saveSession(); renderPreflight(); }
+function updatePreflightCounter() {
+  const items = PREFLIGHT[state.os] || [];
+  const ok = items.filter(it => state.preflight[it.id] === 'ok').length;
+  document.getElementById('preflight-counter').textContent = ok > 0 ? `проверено вами: ${ok} из ${items.length} · скрипт доставит остальное` : '';
+  // кнопка «далее» открывается сразу после выбора ОС — preflight опциональный, скрипт сам всё проверит
+  document.getElementById('btn-next-1').disabled = !state.os;
+}
+
+function renderHermesPreflight() {
+  const items = HERMES_PREFLIGHT[state.os] || [];
+  const wrap = document.getElementById('hermes-preflight-list');
+  if (!wrap) return;
+  if (!state.hermesPreflight) state.hermesPreflight = {};
+  wrap.innerHTML = items.map(it => {
+    const st = state.hermesPreflight[it.id] || 'unknown';
+    const icon = st === 'ok' ? '✓' : st === 'miss' ? '✗' : '?';
+    return `<div class="check-row">
+      <div class="check-icon ${st}">${icon}</div>
+      <div class="check-content"><div class="check-name">${it.name}</div><span class="check-cmd">${it.check}</span></div>
+      <div class="check-actions">
+        <button class="btn-mini copy" onclick="copyText(this, ${JSON.stringify(it.check)})">copy</button>
+        ${it.installCmd ? `<button class="btn-mini copy" onclick="copyText(this, ${JSON.stringify(it.installCmd)})">copy install</button>` : ''}
+        <button class="btn-mini" style="background:var(--green-dim); color:white;" onclick="markHermesPreflight('${it.id}','ok')">✓ есть</button>
+        <button class="btn-mini" style="background:rgba(255,85,119,0.2); color:var(--red); border-color:var(--red);" onclick="markHermesPreflight('${it.id}','miss')">✗ нет</button>
+      </div>
+    </div>`;
+  }).join('');
+  const osLabels = { macos: 'macOS', windows: 'Windows', vps: 'VPS · Linux' };
+  document.getElementById('hermes-os-label').textContent = osLabels[state.os] || '?';
+  document.querySelectorAll('.hermes-os-content').forEach(c => c.style.display = 'none');
+  ['hermes-cmd-','hermes-health-'].forEach(p => { const el = document.getElementById(p + state.os); if (el) el.style.display = 'block'; });
+  updateHermesPreflightCounter();
+}
+function markHermesPreflight(id, status) {
+  state.hermesPreflight[id] = status;
+  saveSession();
+  renderHermesPreflight();
+  updateHermesNextBtn();
+}
+function updateHermesPreflightCounter() {
+  const items = HERMES_PREFLIGHT[state.os] || [];
+  const ok = items.filter(it => (state.hermesPreflight || {})[it.id] === 'ok').length;
+  document.getElementById('hermes-preflight-counter').textContent = `проверено: ${ok} из ${items.length}`;
+}
+
+const LLM_PATTERNS = {
+  'claude-cli': { noKey: true, hint:'ключ не нужен · CLI авторизуется через `claude login` после установки' },
+  'codex-cli':  { noKey: true, hint:'ключ не нужен · CLI авторизуется через ChatGPT-аккаунт при первом запуске' },
+  anthropic:    { prefix:'sk-ant-', hint:'формат: sk-ant-api03-... · console.anthropic.com · держите $5+ на балансе' },
+  openai:       { prefix:'sk-',     hint:'формат: sk-... · platform.openai.com/api-keys · депозит от $5' },
+  proxyapi:     { prefix:'sk-',     hint:'формат: sk-... · proxyapi.ru · оплата картой РФ' },
+  gemini:       { prefix:'AI',      hint:'формат: AIza... · aistudio.google.com/apikey · бесплатно до 60 req/min' },
+  deepseek:     { prefix:'sk-',     hint:'формат: sk-... · platform.deepseek.com · самый дешёвый' },
+  ollama:       { noKey: true, hint:'ключ не нужен · работает локально через ollama (нужен ollama serve)' },
+};
+function validateLlmKey() {
+  const key = document.getElementById('llm-key').value.trim();
+  const hint = document.getElementById('llm-hint');
+  const errEl = document.getElementById('llm-error');
+  const inp = document.getElementById('llm-key');
+  const group = document.getElementById('llm-key-group');
+  state.llmKey = key;
+  saveSession();
+  if (!state.provider) {
+    hint.textContent = 'сначала выберите провайдера';
+    if (group) group.style.display = 'block';
+    document.getElementById('btn-next-3').disabled = true; return;
+  }
+  const p = LLM_PATTERNS[state.provider];
+  hint.textContent = p.hint;
+  // CLI и Ollama — ключ не нужен
+  if (p.noKey) {
+    if (group) group.style.display = 'none';
+    errEl.style.display = 'none';
+    document.getElementById('btn-next-3').disabled = false;
+    state.llmKey = '__cli__';
+    saveSession();
+    return;
+  }
+  if (group) group.style.display = 'block';
+  if (!key || key === '__cli__') {
+    errEl.style.display = 'none'; inp.classList.remove('valid','invalid');
+    document.getElementById('btn-next-3').disabled = true; return;
+  }
+  if (key.startsWith(p.prefix) && key.length > 15) {
+    errEl.style.display = 'none'; inp.classList.add('valid'); inp.classList.remove('invalid');
+    document.getElementById('btn-next-3').disabled = false;
+  } else {
+    errEl.style.display = 'block'; errEl.textContent = `Ключ должен начинаться с "${p.prefix}".`;
+    inp.classList.add('invalid'); inp.classList.remove('valid');
+    document.getElementById('btn-next-3').disabled = true;
+  }
+}
+
+function renderPresets() {
+  const wrap = document.getElementById('presets-list');
+  const basics = MANIFEST.presets.filter(p => !p.flagship);
+  const flagship = MANIFEST.presets.find(p => p.flagship);
+  wrap.innerHTML = basics.map(p => presetHtml(p)).join('') + (flagship ? presetHtml(flagship) : '');
+  if (state.preset) {
+    const el = document.querySelector(`[data-preset-id="${state.preset}"]`);
+    if (el) el.classList.add('selected');
+    document.getElementById('btn-next-4').disabled = false;
+  }
+  updatePresetCounter();
+}
+function presetHtml(p) {
+  return `<div class="preset-card ${p.flagship ? 'flagship' : ''}" data-preset-id="${p.id}" onclick="selectPreset('${p.id}')">
+    <div class="preset-head">
+      <div class="preset-title">${p.emoji} ${p.name}</div>
+      <div>${p.old_price ? `<span class="preset-price-old">${p.old_price} ₽</span>` : ''}<span class="preset-price-new">${p.price} ₽</span></div>
+    </div>
+    <div class="preset-desc">${p.description}</div>
+    <div class="preset-audience">для: ${p.audience}</div>
+    <div class="preset-agents">${p.agents.map(aid => {
+      const a = MANIFEST.agents.find(x => x.id === aid);
+      return `<span class="preset-agent-tag">${a ? a.emoji + ' ' + a.name : aid}</span>`;
+    }).join('')}</div>
+  </div>`;
+}
+function selectPreset(id) {
+  state.preset = id;
+  saveSession();
+  document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('selected'));
+  document.querySelector(`[data-preset-id="${id}"]`).classList.add('selected');
+  document.getElementById('btn-next-4').disabled = false;
+  updatePresetCounter();
+}
+function updatePresetCounter() {
+  if (!state.preset) return;
+  const p = MANIFEST.presets.find(x => x.id === state.preset);
+  document.getElementById('preset-counter').textContent = `${p.name} · ${p.agents.length} агентов · ${p.price} ₽`;
+}
+
+function renderTgTokens() {
+  const preset = MANIFEST.presets.find(p => p.id === state.preset);
+  const wrap = document.getElementById('tg-tokens-wrap');
+  if (!preset) return;
+  const agents = preset.agents.map(aid => MANIFEST.agents.find(a => a.id === aid)).filter(Boolean);
+  wrap.innerHTML = agents.map(a => {
+    const e = state.tgTokens[a.id] || {};
+    return `<div class="agent-token-row">
+      <div class="agent-token-head">
+        <div class="agent-token-name">${a.emoji} ${a.name}</div>
+        <div class="agent-token-status ${e.status || ''}" id="tg-st-${a.id}">${e.botName ? '✓ @' + e.botName : ''}</div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <div class="input-wrap" style="flex:1;">
+          <input type="password" class="input has-eye ${e.status === 'ok' ? 'valid' : ''}" id="tg-${a.id}" placeholder="123456789:AAH..." value="${e.token || ''}" oninput="onTgInput('${a.id}')">
+          <button class="eye-btn" onclick="toggleEye('tg-${a.id}', this)">показать</button>
+        </div>
+        <button class="btn-test" onclick="testTgToken('${a.id}')" id="tg-btn-${a.id}">проверить</button>
+      </div>
+    </div>`;
+  }).join('');
+  updateTgCounter();
+}
+function onTgInput(id) {
+  const v = document.getElementById('tg-' + id).value.trim();
+  state.tgTokens[id] = { ...(state.tgTokens[id] || {}), token: v, status: null, botName: null };
+  document.getElementById('tg-st-' + id).textContent = '';
+  document.getElementById('tg-' + id).classList.remove('valid', 'invalid');
+  saveSession(); updateTgCounter();
+}
+async function testTgToken(id) {
+  const v = (document.getElementById('tg-' + id).value || '').trim();
+  if (!/^\d+:[A-Za-z0-9_-]{30,}$/.test(v)) {
+    state.tgTokens[id] = { token: v, status: 'err', botName: null };
+    document.getElementById('tg-st-' + id).textContent = '✗ невалидный формат';
+    document.getElementById('tg-st-' + id).className = 'agent-token-status err';
+    document.getElementById('tg-' + id).classList.add('invalid');
+    saveSession(); updateTgCounter(); return;
+  }
+  const btn = document.getElementById('tg-btn-' + id);
+  btn.disabled = true; btn.textContent = '...';
+  try {
+    const r = await fetch(`https://api.telegram.org/bot${v}/getMe`);
+    const j = await r.json();
+    if (j.ok) {
+      state.tgTokens[id] = { token: v, status: 'ok', botName: j.result.username };
+      document.getElementById('tg-st-' + id).textContent = '✓ @' + j.result.username;
+      document.getElementById('tg-st-' + id).className = 'agent-token-status ok';
+      document.getElementById('tg-' + id).classList.add('valid');
+    } else throw new Error('invalid');
+  } catch (e) {
+    state.tgTokens[id] = { token: v, status: 'err', botName: null };
+    document.getElementById('tg-st-' + id).textContent = '✗ Telegram отклонил';
+    document.getElementById('tg-st-' + id).className = 'agent-token-status err';
+    document.getElementById('tg-' + id).classList.add('invalid');
+  }
+  btn.disabled = false; btn.textContent = 'проверить';
+  saveSession(); updateTgCounter();
+}
+function updateTgCounter() {
+  const preset = MANIFEST.presets.find(p => p.id === state.preset);
+  if (!preset) return;
+  let ok = 0;
+  preset.agents.forEach(aid => { if ((state.tgTokens[aid] || {}).status === 'ok') ok++; });
+  document.getElementById('tg-counter').textContent = `проверено: ${ok} из ${preset.agents.length}`;
+  document.getElementById('btn-next-5').disabled = ok < preset.agents.length;
+}
+
+function renderKnowledge() {
+  const preset = MANIFEST.presets.find(p => p.id === state.preset);
+  const bundled = preset && preset.bundled_knowledge ? new Set(preset.bundled_knowledge) : new Set();
+  const wrap = document.getElementById('knowledge-list');
+  if (bundled.size > 0) {
+    wrap.innerHTML = `<div class="info-box"><strong>✓ Все 7 AIStack Originals уже включены</strong> в пресет «${preset.name}» бесплатно.</div>
+      <ul style="margin-left: 18px; font-size: 13px; color: var(--text-2);">${MANIFEST.knowledge.filter(k => bundled.has(k.id)).map(k => `<li>${k.name}</li>`).join('')}</ul>`;
+    return;
+  }
+  wrap.innerHTML = MANIFEST.knowledge.map(k => {
+    const sel = state.selectedKnowledge.has(k.id);
+    const agent = MANIFEST.agents.find(a => a.id === k.agent);
+    return `<div class="knowledge-row ${sel ? 'selected' : ''}" onclick="toggleKnowledge('${k.id}')">
+      <div class="knowledge-check"></div>
+      <div class="knowledge-name">${k.name}</div>
+      <span class="knowledge-agent">${agent ? agent.emoji + ' ' + agent.name : k.agent}</span>
+      <span class="knowledge-price">${k.price} ₽</span>
+    </div>`;
+  }).join('');
+  updateKnowledgeCounter();
+}
+function toggleKnowledge(id) {
+  if (state.selectedKnowledge.has(id)) state.selectedKnowledge.delete(id);
+  else state.selectedKnowledge.add(id);
+  saveSession();
+  renderKnowledge();
+}
+function updateKnowledgeCounter() {
+  const total = MANIFEST.knowledge.filter(k => state.selectedKnowledge.has(k.id)).reduce((s,k) => s+k.price, 0);
+  document.getElementById('knowledge-counter').textContent = `выбрано: ${state.selectedKnowledge.size} на сумму ${total} ₽`;
+}
+
+function toggleEye(inputId, btn) {
+  const inp = document.getElementById(inputId);
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = 'скрыть'; }
+  else { inp.type = 'password'; btn.textContent = 'показать'; }
+}
+function copyHealthMac(btn) { copyText(btn, 'curl -sf http://localhost:7777/health && echo " · hermes OK" || echo " · hermes DOWN"'); }
+function copyHealthWin(btn) { copyText(btn, 'try { (iwr http://localhost:7777/health).StatusCode } catch { "DOWN" }'); }
+
+function renderFinal() {
+  const preset = MANIFEST.presets.find(p => p.id === state.preset);
+  const agentsList = preset ? preset.agents.map(aid => { const a = MANIFEST.agents.find(x => x.id === aid); return a ? a.name : aid; }).join(', ') : '';
+  const knowledgeCnt = (preset && preset.bundled_knowledge) ? preset.bundled_knowledge.length : state.selectedKnowledge.size;
+  const knowledgePrice = (preset && preset.bundled_knowledge) ? 0 : MANIFEST.knowledge.filter(k => state.selectedKnowledge.has(k.id)).reduce((s,k) => s+k.price, 0);
+  document.getElementById('summary').innerHTML = `
+    <div class="summary-row"><span class="summary-key">// telegram</span><span class="summary-val">@${state.tgUsername}</span></div>
+    <div class="summary-row"><span class="summary-key">// ос</span><span class="summary-val">${state.os}</span></div>
+    <div class="summary-row"><span class="summary-key">// hermes</span><span class="summary-val">${state.hermes === 'ok' ? '✓ установлен' : '⏭ поставит скрипт'}</span></div>
+    <div class="summary-row"><span class="summary-key">// провайдер</span><span class="summary-val">${state.provider}</span></div>
+    <div class="summary-row"><span class="summary-key">// пресет</span><span class="summary-val">${preset ? preset.name : '?'} · ${preset ? preset.price : 0} ₽</span></div>
+    <div class="summary-row"><span class="summary-key">// команда (${preset ? preset.agents.length : 0})</span><span class="summary-val">${agentsList}</span></div>
+    <div class="summary-row"><span class="summary-key">// telegram-боты</span><span class="summary-val">${Object.values(state.tgTokens).filter(t=>t.status==='ok').length} проверено</span></div>
+    <div class="summary-row"><span class="summary-key">// knowledge (${knowledgeCnt})</span><span class="summary-val">${knowledgePrice > 0 ? '+' + knowledgePrice + ' ₽' : 'входит'}</span></div>
+    <div class="summary-row"><span class="summary-key">// ключ</span><span class="summary-val">•••${state.llmKey.slice(-4)}</span></div>
+    <div class="summary-row" style="font-weight:700; border-top:1px solid var(--border-2); margin-top:4px; padding-top:8px;"><span class="summary-key">// итого</span><span class="summary-val" style="color: var(--accent);">${(preset ? preset.price : 0) + knowledgePrice} ₽</span></div>
+  `;
+  document.getElementById('dl-main-name').textContent = state.os === 'windows' ? 'setup.ps1' : 'setup.sh';
+}
+
+function runDryRun() {
+  const out = document.getElementById('dry-run-output');
+  out.style.display = 'block'; out.innerHTML = '';
+  const preset = MANIFEST.presets.find(p => p.id === state.preset);
+  const items = PREFLIGHT[state.os] || [];
+  const agents = preset ? preset.agents : [];
+  const knowledgeIds = (preset && preset.bundled_knowledge) ? preset.bundled_knowledge : Array.from(state.selectedKnowledge);
+  const knowledge = MANIFEST.knowledge.filter(k => knowledgeIds.includes(k.id));
+  const lines = [
+    `<span class="accent">▶ DRY-RUN · ${new Date().toLocaleString('ru')}</span>`,
+    `<span class="info">[i]</span> @${state.tgUsername} · ${state.os} · ${preset ? preset.name : '?'}`,
+    ``,
+    `<span class="accent">▶ STAGE 1 · PREFLIGHT</span>`,
+    ...items.map(it => `  <span class="${state.preflight[it.id]==='ok'?'ok':'warn'}">${state.preflight[it.id]==='ok'?'✓':'⚠'} ${it.name}</span>`),
+    ``,
+    `<span class="accent">▶ STAGE 2 · OPENCLAW</span>`,
+    `  <span class="ok">✓</span> ${state.os==='windows'?'iwr -useb https://openclaw.ai/install.ps1 | iex':'curl -fsSL https://openclaw.ai/install.sh | bash'}`,
+    ``,
+    `<span class="accent">▶ STAGE 3 · HERMES (Агент.exe runtime + memory)</span>`,
+    state.hermes === 'ok' ? `  <span class="ok">✓</span> Hermes уже установлен` : `  <span class="ok">✓</span> install hermes`,
+    `  <span class="ok">✓</span> openclaw config set memory.provider hermes`,
+    `  <span class="ok">✓</span> openclaw config set coordinator.runtime hermes`,
+    ``,
+    `<span class="accent">▶ STAGE 4 · LLM</span>`,
+    `  <span class="ok">✓</span> openclaw config set providers.default ${state.provider}`,
+    `  <span class="ok">✓</span> openclaw config set providers.${state.provider}.api_key '•••${state.llmKey.slice(-4)}'`,
+    ``,
+    `<span class="accent">▶ STAGE 5 · WORKSPACES (${agents.length})</span>`,
+    ...agents.map(aid => { const tok = state.tgTokens[aid] || {}; return `  <span class="ok">✓</span> mkdir ~/.openclaw/workspace-${aid} → @${tok.botName||'???'}`; }),
+    ``,
+    `<span class="accent">▶ STAGE 6 · AGENTS + GLOBAL SKILLS</span>`,
+    ...agents.map(aid => `  <span class="ok">✓</span> openclaw agents add ${aid} --tg-token $AISTACK_TG_${aid.toUpperCase()}`),
+    `  <span class="info">[i]</span> clawhub install taskflow summarize`,
+    ``,
+    `<span class="accent">▶ STAGE 7 · KNOWLEDGE (${knowledge.length})</span>`,
+    ...(knowledge.length ? knowledge.map(k => `  <span class="ok">✓</span> cp ${k.id}.md → workspace-${k.agent}/projects/`) : ['  <span class="skip">· пропущено</span>']),
+    ``,
+    `<span class="accent">▶ STAGE 8 · START</span>`,
+    `  <span class="ok">✓</span> openclaw gateway start && openclaw doctor`,
+    `  <span class="info">[i]</span> Web UI: localhost:18789 · Hermes: localhost:7777`,
+    ``,
+    `<span class="accent">▶ DRY-RUN OK · команды не выполнены</span>`,
+    `<span class="info">[i]</span> Скачайте bundle.zip ниже и запустите setup.${state.os==='windows'?'ps1':'sh'}`,
+  ];
+  let i = 0;
+  function typeOut() {
+    if (i >= lines.length) return;
+    out.innerHTML += lines[i] + '\n';
+    out.scrollTop = out.scrollHeight;
+    i++; setTimeout(typeOut, 30);
+  }
+  typeOut();
+}
+
+function tgExportsBash(agents) {
+  return agents.map(aid => {
+    const a = MANIFEST.agents.find(x => x.id === aid);
+    const t = state.tgTokens[aid] || {};
+    return `export AISTACK_TG_${aid.toUpperCase()}="${t.token || ''}"  # ${a ? a.name : aid} · @${t.botName || '???'}`;
+  }).join('\n');
+}
+function tgExportsPS(agents) {
+  return agents.map(aid => {
+    const a = MANIFEST.agents.find(x => x.id === aid);
+    const t = state.tgTokens[aid] || {};
+    return `$env:AISTACK_TG_${aid.toUpperCase()} = "${t.token || ''}"  # ${a ? a.name : aid} · @${t.botName || '???'}`;
+  }).join('\n');
+}
+
+function generateBashScript() {
+  const preset = MANIFEST.presets.find(p => p.id === state.preset);
+  const agents = preset ? preset.agents : [];
+  const knowledgeIds = (preset && preset.bundled_knowledge) ? preset.bundled_knowledge : Array.from(state.selectedKnowledge);
+  const knowledge = MANIFEST.knowledge.filter(k => knowledgeIds.includes(k.id));
+  const isVps = state.os === 'vps';
+  return `#!/usr/bin/env bash
+# AIStack · Personal Installer v2 · ${preset ? preset.name : '?'}
+# Bound to: @${state.tgUsername} · ${new Date().toISOString()}
+set -euo pipefail
+GRN=$'\\033[32m'; YEL=$'\\033[33m'; CYA=$'\\033[36m'; RED=$'\\033[31m'; RST=$'\\033[0m'
+say()  { echo "\${CYA}▸\${RST} $*"; }
+ok()   { echo "\${GRN}✓\${RST} $*"; }
+warn() { echo "\${YEL}!\${RST} $*"; }
+
+export AISTACK_BOUND_TG="@${state.tgUsername}"
+export AISTACK_PROVIDER="${state.provider}"
+export AISTACK_LLM_KEY="${state.llmKey}"
+export AISTACK_PRESET="${preset ? preset.id : ''}"
+${tgExportsBash(agents)}
+
+say "STAGE 1/8 · preflight"
+for cmd in node git curl; do command -v $cmd &>/dev/null && ok "$cmd" || warn "$cmd не найден"; done
+
+say "STAGE 2/8 · install OpenClaw"
+command -v openclaw &>/dev/null || curl -fsSL https://openclaw.ai/install.sh | bash -s -- --no-onboard
+openclaw --version && ok "OpenClaw OK"
+
+say "STAGE 3/8 · install Hermes (Агент.exe runtime + memory)"
+if ! command -v hermes &>/dev/null; then
+  ${isVps ? 'curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | sudo bash' : 'curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash'}
+fi
+${isVps ? 'sudo systemctl enable hermes 2>/dev/null; sudo systemctl start hermes 2>/dev/null' : ''}
+sleep 2
+curl -sf http://localhost:7777/health > /dev/null 2>&1 && ok "Hermes отвечает" || warn "Hermes не отвечает"
+openclaw config set memory.provider hermes || true
+openclaw config set coordinator.runtime hermes || true
+
+say "STAGE 4/8 · configure \${AISTACK_PROVIDER}"
+openclaw config set providers.default "\${AISTACK_PROVIDER}" || true
+openclaw config set providers."\${AISTACK_PROVIDER}".api_key "\${AISTACK_LLM_KEY}" || true
+
+say "STAGE 5/8 · create workspaces"
+SCRIPT_DIR="$(cd "$(dirname "\${BASH_SOURCE[0]}")" && pwd)"
+${agents.map(aid => `mkdir -p ~/.openclaw/workspace-${aid}
+cp -r "\${SCRIPT_DIR}/workspace-templates/${aid}/." ~/.openclaw/workspace-${aid}/ 2>/dev/null
+ok "workspace-${aid}"`).join('\n')}
+
+say "STAGE 6/8 · register agents"
+${agents.map(aid => `openclaw agents add ${aid} --workspace ~/.openclaw/workspace-${aid} --telegram-token "\$AISTACK_TG_${aid.toUpperCase()}" 2>/dev/null || true`).join('\n')}
+clawhub install taskflow summarize 2>/dev/null || true
+
+say "STAGE 7/8 · copy knowledge"
+${knowledge.length ? knowledge.map(k => `cp "\${SCRIPT_DIR}/knowledge/${k.id}.md" ~/.openclaw/workspace-${k.agent}/projects/ 2>/dev/null && ok "${k.name}"`).join('\n') : '# нет knowledge'}
+
+say "STAGE 8/8 · start"
+openclaw gateway start || true
+openclaw doctor
+echo ""
+echo "\${GRN}✓\${RST} AIStack установлен. Web UI: http://localhost:18789"
+echo "  Telegram: напишите @${(state.tgTokens.coordinator||{}).botName || 'your-coordinator-bot'} «привет»"
+`;
+}
+
+function generatePowerShellScript() {
+  const preset = MANIFEST.presets.find(p => p.id === state.preset);
+  const agents = preset ? preset.agents : [];
+  const knowledgeIds = (preset && preset.bundled_knowledge) ? preset.bundled_knowledge : Array.from(state.selectedKnowledge);
+  const knowledge = MANIFEST.knowledge.filter(k => knowledgeIds.includes(k.id));
+  return `# AIStack Installer v2 · ${preset ? preset.name : '?'}
+$ErrorActionPreference = "Stop"
+function Say($t) { Write-Host "▸ $t" -ForegroundColor Cyan }
+function Ok($t)  { Write-Host "✓ $t" -ForegroundColor Green }
+function Wn($t)  { Write-Host "! $t" -ForegroundColor Yellow }
+
+$env:AISTACK_BOUND_TG = "@${state.tgUsername}"
+$env:AISTACK_PROVIDER = "${state.provider}"
+$env:AISTACK_LLM_KEY  = "${state.llmKey}"
+${tgExportsPS(agents)}
+
+Say "STAGE 1/8 · preflight"
+foreach ($c in 'node','git') { if (Get-Command $c -ErrorAction SilentlyContinue) { Ok $c } else { Wn $c } }
+
+Say "STAGE 2/8 · OpenClaw"
+if (-not (Get-Command openclaw -ErrorAction SilentlyContinue)) { iwr -useb https://openclaw.ai/install.ps1 | iex }
+& openclaw --version
+
+Say "STAGE 3/8 · Hermes"
+if (-not (Get-Command hermes -ErrorAction SilentlyContinue)) { iwr -useb https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.ps1 | iex }
+Start-Sleep -Seconds 2
+try { $r = Invoke-WebRequest http://localhost:7777/health -UseBasicParsing -TimeoutSec 3; if ($r.StatusCode -eq 200) { Ok "Hermes OK" } } catch { Wn "Hermes DOWN" }
+& openclaw config set memory.provider hermes
+& openclaw config set coordinator.runtime hermes
+
+Say "STAGE 4/8 · LLM"
+& openclaw config set providers.default $env:AISTACK_PROVIDER
+& openclaw config set "providers.$($env:AISTACK_PROVIDER).api_key" $env:AISTACK_LLM_KEY
+
+Say "STAGE 5/8 · workspaces"
+$SCRIPT_DIR = Split-Path -Parent $MyInvocation.MyCommand.Path
+${agents.map(aid => `New-Item -ItemType Directory -Force -Path "$HOME\\.openclaw\\workspace-${aid}" | Out-Null
+Copy-Item -Recurse -Force "$SCRIPT_DIR\\workspace-templates\\${aid}\\*" "$HOME\\.openclaw\\workspace-${aid}\\"
+Ok "workspace-${aid}"`).join('\n')}
+
+Say "STAGE 6/8 · agents"
+${agents.map(aid => `& openclaw agents add ${aid} --workspace "$HOME\\.openclaw\\workspace-${aid}" --telegram-token $env:AISTACK_TG_${aid.toUpperCase()}`).join('\n')}
+& clawhub install taskflow summarize
+
+Say "STAGE 7/8 · knowledge"
+${knowledge.length ? knowledge.map(k => `Copy-Item -Force "$SCRIPT_DIR\\knowledge\\${k.id}.md" "$HOME\\.openclaw\\workspace-${k.agent}\\projects\\"`).join('\n') : '# нет knowledge'}
+
+Say "STAGE 8/8 · start"
+& openclaw gateway start
+& openclaw doctor
+Write-Host "✓ AIStack установлен." -ForegroundColor Green
+`;
+}
+
+function generateEnvFile() {
+  const preset = MANIFEST.presets.find(p => p.id === state.preset);
+  const agents = preset ? preset.agents : [];
+  const lines = [
+    '# AIStack environment · do not share',
+    `# Bound: @${state.tgUsername} · Preset: ${preset ? preset.name : '?'}`,
+    '',
+    `AISTACK_PROVIDER=${state.provider}`,
+    `AISTACK_LLM_KEY=${state.llmKey}`,
+    `AISTACK_PRESET=${preset ? preset.id : ''}`,
+    `AISTACK_BOUND_TG=@${state.tgUsername}`,
+    '',
+  ];
+  agents.forEach(aid => {
+    const a = MANIFEST.agents.find(x => x.id === aid);
+    const t = state.tgTokens[aid] || {};
+    lines.push(`AISTACK_TG_${aid.toUpperCase()}=${t.token || ''}  # ${a ? a.name : aid}`);
+  });
+  return lines.join('\n') + '\n';
+}
+
+function generatePathMd() {
+  const preset = MANIFEST.presets.find(p => p.id === state.preset);
+  return `# AIStack · Путь установки\n\n@${state.tgUsername} · ${state.os} · ${preset ? preset.name : '?'}\n\nЗапустите ${state.os === 'windows' ? 'powershell -ExecutionPolicy Bypass -File .\\setup.ps1' : 'bash setup.sh'}\n`;
+}
+
+function blobDownload(content, name) {
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = name; a.click();
+  URL.revokeObjectURL(url);
+  showToast(`↓ ${name}`);
+}
+async function downloadFile(kind) {
+  if (kind === 'env') return blobDownload(generateEnvFile(), 'aistack.env');
+  if (kind === 'path') return blobDownload(generatePathMd(), 'installation-path.md');
+  if (kind === 'all') return downloadBundle();
+  blobDownload(state.os === 'windows' ? generatePowerShellScript() : generateBashScript(), state.os === 'windows' ? 'setup.ps1' : 'setup.sh');
+}
+async function downloadBundle() {
+  if (typeof JSZip === 'undefined') { showToast('JSZip не загружен', 'error'); return; }
+  const zip = new JSZip();
+  const preset = MANIFEST.presets.find(p => p.id === state.preset);
+  const agents = preset ? preset.agents : [];
+  const knowledgeIds = (preset && preset.bundled_knowledge) ? preset.bundled_knowledge : Array.from(state.selectedKnowledge);
+  const ext = state.os === 'windows' ? 'ps1' : 'sh';
+  zip.file('setup.' + ext, state.os === 'windows' ? generatePowerShellScript() : generateBashScript());
+  zip.file('aistack.env', generateEnvFile());
+  zip.file('installation-path.md', generatePathMd());
+
+  let okT = 0, okS = 0, okK = 0;
+  for (const aid of agents) {
+    const folder = zip.folder('workspace-templates').folder(aid);
+    const baseFiles = ['SOUL.md','IDENTITY.md','AGENTS.md','LEARNING.md','TOOLS.md','MEMORY.md','HEARTBEAT.md','USER.md.template','PRE_SEND_CHECKLIST.md'];
+    if (aid === 'coordinator') baseFiles.push('MASTER_BRIEF.md.template','ARTIFACTS_REGISTRY.md','SYSTEM_STATUS.md','TASK_BRIEF_TEMPLATE.md','PROJECT_HANDOFF_SCHEMA.md');
+    for (const fname of baseFiles) {
+      const content = await fetchFromRepo(`workspace-templates/${aid}/${fname}`);
+      if (content) { folder.file(fname, content); okT++; }
+      else folder.file(fname, `# ${fname} (KNOWLEDGE_REPO_URL не настроен)\n`);
+    }
+    for (const sub of ['outputs','handoff','shared','artifacts','projects']) {
+      folder.folder(sub).file('README.md', `# ${sub}/\n`);
+    }
+  }
+  for (const aid of agents) {
+    if (aid === 'coordinator') {
+      for (const skName of ['agent-collaboration-network','close-loop']) {
+        const c = await fetchFromRepo(`skills/coordinator/${skName}/SKILL.md`);
+        if (c) { zip.folder('skills').folder('coordinator').folder(skName).file('SKILL.md', c); okS++; }
+      }
+    }
+    if (aid === 'designer') {
+      const f = zip.folder('skills').folder('designer').folder('carousel');
+      for (const fn of ['SKILL.md','package.json']) {
+        const c = await fetchFromRepo(`skills/designer/carousel/${fn}`);
+        if (c) { f.file(fn, c); okS++; }
+      }
+      const rb = zip.folder('skills').folder('designer').folder('remove-bg');
+      const c1 = await fetchFromRepo('skills/designer/remove-bg/SKILL.md');
+      if (c1) { rb.file('SKILL.md', c1); okS++; }
+      const c2 = await fetchFromRepo('skills/designer/remove-bg/scripts/remove_bg.sh');
+      if (c2) { rb.folder('scripts').file('remove_bg.sh', c2); okS++; }
+    }
+  }
+  for (const kid of knowledgeIds) {
+    const k = MANIFEST.knowledge.find(x => x.id === kid);
+    if (!k) continue;
+    const c = await fetchFromRepo(`knowledge/aistack-originals/${kid.replace(/^aistack-/, '')}.md`);
+    if (c) { zip.folder('knowledge').file(`${kid}.md`, c); okK++; }
+  }
+  zip.file('README.txt', `AIStack Bundle · @${state.tgUsername} · ${preset ? preset.name : '?'}\nЗапустить: ${state.os === 'windows' ? 'powershell -ExecutionPolicy Bypass -File .\\setup.ps1' : 'bash setup.sh'}\n`);
+  const blob = await zip.generateAsync({ type: 'blob' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'aistack-bundle.zip'; a.click();
+  URL.revokeObjectURL(url);
+  showToast(`↓ bundle · templates:${okT} · skills:${okS} · knowledge:${okK}`);
+}
+
+async function fetchFromRepo(path) {
+  if (!KNOWLEDGE_REPO_URL || KNOWLEDGE_TOKEN === 'github_pat_ВАШ_ТОКЕН_СЮДА') return null;
+  try {
+    const headers = KNOWLEDGE_TOKEN ? { 'Authorization': `Bearer ${KNOWLEDGE_TOKEN}` } : {};
+    const r = await fetch(`${KNOWLEDGE_REPO_URL}/${path}`, { headers });
+    if (!r.ok) return null;
+    return await r.text();
+  } catch (e) { return null; }
+}
+async function checkRepoConnection() {
+  const status = document.getElementById('repo-status');
+  if (!KNOWLEDGE_REPO_URL || KNOWLEDGE_TOKEN === 'github_pat_ВАШ_ТОКЕН_СЮДА') {
+    status.textContent = '· token не вставлен · встроенный fallback';
+    status.style.color = 'var(--yellow)';
+    return;
+  }
+  const m = await fetchFromRepo('manifest.json');
+  if (m) {
+    try {
+      const parsed = JSON.parse(m);
+      MANIFEST = parsed;
+      status.textContent = `· repo ✓ ${parsed.agents.length} агентов · ${parsed.presets.length} пресетов`;
+      status.style.color = 'var(--green)';
+    } catch (e) { status.textContent = '· repo ✗ битый JSON'; status.style.color = 'var(--red)'; }
+  } else {
+    status.textContent = '· repo ✗ не отвечает';
+    status.style.color = 'var(--red)';
+  }
+}
+
+function copyText(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.classList.add('copied');
+    const orig = btn.textContent;
+    btn.textContent = '✓';
+    showToast('✓ скопировано');
+    setTimeout(() => { btn.classList.remove('copied'); btn.textContent = orig; }, 1500);
+  });
+}
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.remove('error');
+  if (type === 'error') t.classList.add('error');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+checkRepoConnection();
+loadSession();
+if (state.step >= 1 && state.sessionStart) {
+  const elapsed = (Date.now() - state.sessionStart) / 1000 / 60;
+  if (elapsed < SESSION_TTL_MIN) {
+    goToStep(state.step);
+    startSessionTimer();
+    document.getElementById('gate-status').textContent = 'authorized';
+    document.getElementById('gate-status').className = 'term-status authorized';
+    if (state.os) { const el = document.querySelector(`#step-1 .option[data-value="${state.os}"]`); if (el) { el.classList.add('selected'); renderPreflight(); } }
+    if (state.hermes) { const el = document.querySelector(`#step-2 .option[data-value="${state.hermes}"]`); if (el) el.classList.add('selected'); if (state.step === 2) renderHermesPreflight(); updateHermesNextBtn(); }
+    if (state.provider) { const el = document.querySelector(`#step-3 .option[data-value="${state.provider}"]`); if (el) el.classList.add('selected'); if (state.llmKey) document.getElementById('llm-key').value = state.llmKey; validateLlmKey(); }
+  } else clearAndExit();
+}
+</script>
+
+</body>
+</html>
