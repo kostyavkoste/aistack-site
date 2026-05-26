@@ -710,6 +710,44 @@ const SESSION_TTL_MIN = 45;
 const KNOWLEDGE_REPO_URL = 'https://raw.githubusercontent.com/kostyavkoste/aistack-knowledge/main';
 const KNOWLEDGE_TOKEN    = 'github_pat_ВАШ_ТОКЕН_СЮДА';
 
+// ===========================================================================
+// HERMES WIZARD GUIDE — встраивается в bundle.zip рядом с setup.sh
+// ===========================================================================
+const WIZARD_GUIDE_CONTENT = `# Пошаговая инструкция по Hermes Setup Wizard
+
+После того как setup.sh дойдёт до Stage 3 (Install Hermes), запустится Hermes Agent Setup Wizard. Он задаст ~6 вопросов. Действуйте так:
+
+## Вопрос 1: "Would you like to see what can be imported?"
+**Ответ:** \`Y\` + Enter
+
+## Вопрос 2: "How would you like to set up Hermes?"
+- 1. Quick setup (recommended)
+- 2. Full setup
+
+**Ответ:** \`1\` + Enter
+
+## Вопрос 3: AI Provider Selection (41 опция)
+Список большой, нужно ввести номер провайдера. Если вы выбрали в визарде:
+- **Anthropic** → введите \`1\` + Enter
+- **OpenAI** → введите \`2\` + Enter
+- **ProxyAPI** → введите \`14\` + Enter (примерно — посмотрите на экране)
+- Если не знаете → \`38. custom\` → введите свой URL
+
+## Вопрос 4: Terminal backend (8 опций)
+**Ответ:** \`8\` + Enter (Keep current — local)
+
+## Вопрос 5: Connect a messaging platform?
+- 1. Set up messaging now
+- 2. Skip — set up later
+
+**Ответ:** \`2\` + Enter (мы настроим ботов отдельно через openclaw, не через Hermes wizard)
+
+## Если что-то пошло не так
+- Wizard завис → нажмите Enter ещё раз.
+- Ctrl+C не выходит → откройте новый Terminal, выполните \`docker kill <container_name>\` (для Docker) или \`pkill -f hermes\` (на сервере).
+- После завершения wizard'а скрипт продолжит автоматически.
+`;
+
 const FALLBACK_MANIFEST = {
   agents: [
     { id:'coordinator',  name:'Агент.exe (Координатор)', emoji:'🧭' },
@@ -931,7 +969,7 @@ function updateOsCommands() {
   if (dlName) dlName.textContent = state.os === 'windows' ? 'setup.bat (для Windows)' : 'setup.sh';
 }
 function updateHermesNextBtn() {
-  if (state.hermes === 'skip') { document.getElementById('btn-next-2').disabled = false; return; }
+  if (state.hermes === 'skip' || state.hermes === 'no') { document.getElementById('btn-next-2').disabled = false; return; }
   if (state.hermes === 'ok') {
     const items = HERMES_PREFLIGHT[state.os] || [];
     const ok = items.filter(it => (state.hermesPreflight || {})[it.id] === 'ok').length;
@@ -1777,7 +1815,8 @@ pause
     const c = await fetchFromRepo(`knowledge/aistack-originals/${kid.replace(/^aistack-/, '')}.md`);
     if (c) { zip.folder('knowledge').file(`${kid}.md`, c); okK++; }
   }
-  zip.file('README.txt', `AIStack Bundle · @${state.tgUsername} · ${preset ? preset.name : '?'}\nЗапустить: ${state.os === 'windows' ? 'powershell -ExecutionPolicy Bypass -File .\\setup.ps1' : 'bash setup.sh'}\n`);
+  zip.file('WIZARD-GUIDE.md', WIZARD_GUIDE_CONTENT);
+  zip.file('README.txt', `AIStack Bundle · @${state.tgUsername} · ${preset ? preset.name : '?'}\nЗапустить: ${state.os === 'windows' ? 'powershell -ExecutionPolicy Bypass -File .\\setup.ps1' : 'bash setup.sh'}\n\nВажно: после Stage 3 запустится интерактивный Hermes Setup Wizard.\nСм. WIZARD-GUIDE.md — там пошаговая инструкция что на каком экране нажимать.\n`);
   const blob = await zip.generateAsync({ type: 'blob' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href = url; a.download = 'aistack-bundle.zip'; a.click();
